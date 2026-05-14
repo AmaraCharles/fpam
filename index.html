@@ -762,6 +762,86 @@
     font-size: 0.75rem; color: rgba(255,255,255,0.25);
   }
 
+
+
+  /* ─── CONDITION REPORT SECTION ─── */
+  .condition-section{background:var(--white);padding:100px 0}
+  .condition-inner{max-width:1280px;margin:0 auto;padding:0 5%}
+  .condition-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:80px;align-items:center;margin-top:64px}
+  .condition-donut-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+  .condition-donut{position:relative;width:280px;height:280px;flex-shrink:0}
+  .condition-donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .condition-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .condition-donut-num{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:900;color:var(--navy-dark);line-height:1}
+  .condition-donut-label{font-size:0.68rem;color:var(--gray-400);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px}
+  .condition-legend{display:flex;flex-direction:column;gap:14px;margin-left:36px}
+  .condition-legend-item{display:flex;align-items:center;gap:12px}
+  .condition-legend-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+  .condition-legend-name{font-size:0.82rem;color:var(--text);font-weight:500}
+  .condition-legend-pct{font-size:0.8rem;color:var(--gray-400);margin-left:auto;font-weight:600}
+  .condition-right{}
+  .condition-grades{display:flex;flex-direction:column;gap:14px;margin-top:36px}
+  .condition-grade{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:12px;padding:18px 22px;display:flex;align-items:center;gap:16px;transition:all 0.25s}
+  .condition-grade:hover{background:var(--white);box-shadow:0 4px 20px rgba(13,26,16,0.07);border-color:var(--gray-200)}
+  .condition-grade-badge{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;font-family:'Cormorant Garamond',serif;flex-shrink:0;color:var(--white)}
+  .grade-a{background:#2d5e38}
+  .grade-b{background:#4a7a56}
+  .grade-c{background:#8a9e52}
+  .grade-d{background:#b8b4ac}
+  .grade-e{background:#8a8a82}
+  .condition-grade-info{flex:1}
+  .condition-grade-title{font-weight:600;font-size:0.88rem;color:var(--text);margin-bottom:3px}
+  .condition-grade-desc{font-size:0.78rem;color:var(--gray-400);line-height:1.45}
+  .condition-grade-count{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:900;color:var(--navy-dark);flex-shrink:0}
+
+  /* ─── INSPECTION CYCLE SECTION ─── */
+  .inspection-section{background:var(--navy-dark);padding:100px 0}
+  .inspection-inner{max-width:1280px;margin:0 auto;padding:0 5%}
+  .inspection-section .section-tag{color:var(--platinum-light)}
+  .inspection-section .section-tag::before{background:var(--platinum)}
+  .inspection-section .section-title{color:var(--white)}
+  .inspection-section .section-lead{color:rgba(255,255,255,0.55);max-width:620px}
+  .inspection-timeline{position:relative;margin-top:60px;display:flex;flex-direction:column;gap:0}
+  .inspection-timeline::before{content:'';position:absolute;left:32px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,rgba(200,196,188,0.2),transparent)}
+  .it-item{display:grid;grid-template-columns:64px 1fr;gap:28px;padding-bottom:44px;position:relative}
+  .it-item:last-child{padding-bottom:0}
+  .it-node{width:64px;display:flex;flex-direction:column;align-items:center;gap:0}
+  .it-circle{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(200,196,188,0.3);background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:var(--platinum-light);flex-shrink:0;position:relative;z-index:2;transition:all 0.3s}
+  .it-item:hover .it-circle{background:var(--sage);border-color:var(--sage);color:var(--white)}
+  .it-quarter{font-size:0.58rem;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin-top:6px;text-align:center}
+  .it-content{padding-top:8px}
+  .it-title{font-weight:600;font-size:0.95rem;color:var(--white);margin-bottom:6px}
+  .it-desc{font-size:0.83rem;color:rgba(255,255,255,0.48);line-height:1.65}
+  .it-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .it-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:3px 10px;font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:0.06em;text-transform:uppercase}
+  .inspection-panels{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+  .ip-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:28px 24px;transition:all 0.3s}
+  .ip-card:hover{background:rgba(255,255,255,0.07);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.35)}
+  .ip-icon{font-size:1.4rem;color:var(--sage-light);margin-bottom:16px}
+  .ip-title{font-weight:700;font-size:0.9rem;color:var(--white);margin-bottom:10px}
+  .ip-body{font-size:0.81rem;color:rgba(255,255,255,0.48);line-height:1.65}
+
+  /* ─── ASSET VALUATION SECTION ─── */
+  .valuation-section{background:var(--gray-50);padding:100px 0}
+  .valuation-inner{max-width:1280px;margin:0 auto;padding:0 5%}
+  .valuation-header{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-bottom:56px}
+  .valuation-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .val-card{background:var(--white);border:1px solid var(--gray-200);border-radius:16px;padding:32px 28px;transition:all 0.3s;overflow:hidden;position:relative}
+  .val-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy-dark),var(--sage));transform:scaleX(0);transition:transform 0.35s;transform-origin:left}
+  .val-card:hover::before{transform:scaleX(1)}
+  .val-card:hover{box-shadow:0 12px 44px rgba(13,26,16,0.1);transform:translateY(-4px)}
+  .val-num{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:900;color:rgba(13,26,16,0.08);line-height:1;margin-bottom:12px}
+  .val-icon{font-size:1.3rem;color:var(--sage);margin-bottom:14px}
+  .val-title{font-weight:700;font-size:0.92rem;color:var(--text);margin-bottom:10px}
+  .val-body{font-size:0.82rem;color:var(--gray-600);line-height:1.68}
+  .valuation-bottom{margin-top:52px;background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid));border-radius:16px;padding:48px 52px;display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:center}
+  .vb-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:800;color:var(--white);line-height:1.15;margin-bottom:14px}
+  .vb-body{font-size:0.88rem;color:rgba(255,255,255,0.52);line-height:1.75}
+  .vb-metrics{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .vb-metric{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px 22px}
+  .vb-metric-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:900;color:var(--white);line-height:1;margin-bottom:5px}
+  .vb-metric-label{font-size:0.7rem;color:rgba(255,255,255,0.4);letter-spacing:0.07em;text-transform:uppercase}
+
   /* ─── ANIMATIONS ─── */
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeLeft { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
@@ -1135,6 +1215,283 @@
   </div>
 </section>
 
+
+
+
+<!-- ═══════════════════════════
+     SECTION A: ASSET CONDITION REPORT
+════════════════════════════════ -->
+<section id="condition" class="condition-section">
+  <div class="condition-inner">
+    <div class="reveal">
+      <div class="section-tag">Condition Assessment</div>
+      <h2 class="section-title">National Asset Condition Report</h2>
+      <p class="section-lead">Every federal building in the FPAM register is graded annually against a five-tier condition framework. Field engineers carry out structural, mechanical, and safety evaluations — generating a live picture of the physical state of Nigeria's federal estate and informing maintenance budget allocation.</p>
+    </div>
+
+    <div class="condition-grid">
+      <div class="condition-donut-wrap reveal">
+        <div class="condition-donut">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Total circumference for r=44: 2π×44 ≈ 276.46 -->
+            <!-- Grade A: 38% → dash=105.1  offset=0 -->
+            <circle cx="60" cy="60" r="44" fill="none" stroke="var(--gray-100)" stroke-width="14"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#2d5e38" stroke-width="14"
+              stroke-dasharray="105.1 276.46" stroke-dashoffset="0" stroke-linecap="butt"/>
+            <!-- Grade B: 31% → dash=85.7  offset=-105.1 -->
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#4a7a56" stroke-width="14"
+              stroke-dasharray="85.7 276.46" stroke-dashoffset="-105.1" stroke-linecap="butt"/>
+            <!-- Grade C: 18% → dash=49.8  offset=-190.8 -->
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#8a9e52" stroke-width="14"
+              stroke-dasharray="49.8 276.46" stroke-dashoffset="-190.8" stroke-linecap="butt"/>
+            <!-- Grade D: 9% → dash=24.9  offset=-240.6 -->
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#b8b4ac" stroke-width="14"
+              stroke-dasharray="24.9 276.46" stroke-dashoffset="-240.6" stroke-linecap="butt"/>
+            <!-- Grade E: 4% → dash=11.1  offset=-265.5 -->
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#8a8a82" stroke-width="14"
+              stroke-dasharray="11.1 276.46" stroke-dashoffset="-265.5" stroke-linecap="butt"/>
+          </svg>
+          <div class="condition-donut-center">
+            <div class="condition-donut-num">2,764</div>
+            <div class="condition-donut-label">Assets Graded</div>
+          </div>
+        </div>
+        <div class="condition-legend">
+          <div class="condition-legend-item"><div class="condition-legend-swatch" style="background:#2d5e38"></div><span class="condition-legend-name">Grade A — Excellent</span><span class="condition-legend-pct">38%</span></div>
+          <div class="condition-legend-item"><div class="condition-legend-swatch" style="background:#4a7a56"></div><span class="condition-legend-name">Grade B — Good</span><span class="condition-legend-pct">31%</span></div>
+          <div class="condition-legend-item"><div class="condition-legend-swatch" style="background:#8a9e52"></div><span class="condition-legend-name">Grade C — Fair</span><span class="condition-legend-pct">18%</span></div>
+          <div class="condition-legend-item"><div class="condition-legend-swatch" style="background:#b8b4ac"></div><span class="condition-legend-name">Grade D — Poor</span><span class="condition-legend-pct">9%</span></div>
+          <div class="condition-legend-item"><div class="condition-legend-swatch" style="background:#8a8a82"></div><span class="condition-legend-name">Grade E — Critical</span><span class="condition-legend-pct">4%</span></div>
+        </div>
+      </div>
+
+      <div class="condition-right reveal">
+        <div class="section-tag">Grading Framework</div>
+        <h3 class="section-title" style="font-size:1.9rem">How We Grade Federal Buildings</h3>
+        <p style="font-size:0.92rem;color:var(--gray-600);line-height:1.75;margin-bottom:8px">Each of Nigeria's 2,764+ registered federal assets receives an annual condition grade determined by FPAM-certified engineers. Grades drive maintenance budget prioritisation — Grade D and E assets trigger emergency procurement, while Grade A and B assets enter routine servicing cycles.</p>
+        <div class="condition-grades">
+          <div class="condition-grade">
+            <div class="condition-grade-badge grade-a">A</div>
+            <div class="condition-grade-info">
+              <div class="condition-grade-title">Excellent — Fully Operational</div>
+              <div class="condition-grade-desc">Structurally sound, all systems functional, no maintenance deficit. Enters standard quarterly servicing.</div>
+            </div>
+            <div class="condition-grade-count">1,050</div>
+          </div>
+          <div class="condition-grade">
+            <div class="condition-grade-badge grade-b">B</div>
+            <div class="condition-grade-info">
+              <div class="condition-grade-title">Good — Minor Defects Only</div>
+              <div class="condition-grade-desc">Minor wear, cosmetic issues, or non-critical system faults. Scheduled for routine rectification.</div>
+            </div>
+            <div class="condition-grade-count">857</div>
+          </div>
+          <div class="condition-grade">
+            <div class="condition-grade-badge grade-c">C</div>
+            <div class="condition-grade-info">
+              <div class="condition-grade-title">Fair — Moderate Deterioration</div>
+              <div class="condition-grade-desc">Noticeable structural or system issues. Maintenance intervention required within the current fiscal year.</div>
+            </div>
+            <div class="condition-grade-count">497</div>
+          </div>
+          <div class="condition-grade">
+            <div class="condition-grade-badge grade-d">D</div>
+            <div class="condition-grade-info">
+              <div class="condition-grade-title">Poor — Significant Deterioration</div>
+              <div class="condition-grade-desc">Structural compromise or critical system failure. Fast-tracked for emergency contract procurement.</div>
+            </div>
+            <div class="condition-grade-count">249</div>
+          </div>
+          <div class="condition-grade">
+            <div class="condition-grade-badge grade-e">E</div>
+            <div class="condition-grade-info">
+              <div class="condition-grade-title">Critical — Immediate Action Required</div>
+              <div class="condition-grade-desc">Unsafe for occupation or public access. Closed pending emergency intervention or demolition review.</div>
+            </div>
+            <div class="condition-grade-count">111</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════
+     SECTION B: INSPECTION CYCLE
+════════════════════════════════ -->
+<section id="inspection" class="inspection-section">
+  <div class="inspection-inner">
+    <div class="reveal">
+      <div class="section-tag">Operations</div>
+      <h2 class="section-title">The FPAM Inspection &amp; Maintenance Cycle</h2>
+      <p class="section-lead">FPAM operates a structured four-quarter inspection cycle across all 37 states and FCT. Each phase involves different teams, tools, and outcomes — together ensuring no federal asset goes uninspected for more than twelve months.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:60px;align-items:start">
+      <div class="inspection-timeline reveal">
+        <div class="it-item">
+          <div class="it-node">
+            <div class="it-circle"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="it-quarter">Q1 — Jan/Mar</div>
+          </div>
+          <div class="it-content">
+            <div class="it-title">Annual Survey &amp; Registration Verification</div>
+            <div class="it-desc">Field teams verify all assets listed in the national database against physical ground-truth. New assets are added; decommissioned structures are flagged for removal. GPS coordinates and photographic evidence are updated for every property.</div>
+            <div class="it-tags">
+              <span class="it-tag"><i class="fa-solid fa-location-dot"></i> GPS Verification</span>
+              <span class="it-tag"><i class="fa-solid fa-camera"></i> Photo Survey</span>
+              <span class="it-tag"><i class="fa-solid fa-database"></i> Database Update</span>
+            </div>
+          </div>
+        </div>
+        <div class="it-item">
+          <div class="it-node">
+            <div class="it-circle"><i class="fa-solid fa-hard-hat"></i></div>
+            <div class="it-quarter">Q2 — Apr/Jun</div>
+          </div>
+          <div class="it-content">
+            <div class="it-title">Structural &amp; Safety Assessment</div>
+            <div class="it-desc">Certified structural engineers carry out full building assessments — inspecting foundations, load-bearing elements, roofing, plumbing, electrical systems, fire safety compliance, and disability access. Condition grades are issued and uploaded to the central registry.</div>
+            <div class="it-tags">
+              <span class="it-tag"><i class="fa-solid fa-building"></i> Structural Check</span>
+              <span class="it-tag"><i class="fa-solid fa-fire-extinguisher"></i> Fire Safety</span>
+              <span class="it-tag"><i class="fa-solid fa-wheelchair"></i> Accessibility</span>
+            </div>
+          </div>
+        </div>
+        <div class="it-item">
+          <div class="it-node">
+            <div class="it-circle"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <div class="it-quarter">Q3 — Jul/Sep</div>
+          </div>
+          <div class="it-content">
+            <div class="it-title">Maintenance Execution &amp; Contractor Supervision</div>
+            <div class="it-desc">Based on Q2 grades, maintenance contracts are awarded and executed. FPAM supervisory engineers conduct weekly site visits to verify workmanship, materials quality, and timeline adherence. Contractors are rated on completion and can be blacklisted for non-performance.</div>
+            <div class="it-tags">
+              <span class="it-tag"><i class="fa-solid fa-gavel"></i> Contract Award</span>
+              <span class="it-tag"><i class="fa-solid fa-user-check"></i> Site Supervision</span>
+              <span class="it-tag"><i class="fa-solid fa-star"></i> Vendor Rating</span>
+            </div>
+          </div>
+        </div>
+        <div class="it-item">
+          <div class="it-node">
+            <div class="it-circle"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="it-quarter">Q4 — Oct/Dec</div>
+          </div>
+          <div class="it-content">
+            <div class="it-title">Performance Review &amp; Annual Report Compilation</div>
+            <div class="it-desc">The year is closed with a national performance audit — measuring how many assets improved in grade, how many deteriorated, total maintenance spend versus budget, and contractor compliance rates. Findings inform the following year's budget submission to the Federal Ministry of Finance.</div>
+            <div class="it-tags">
+              <span class="it-tag"><i class="fa-solid fa-file-contract"></i> Annual Report</span>
+              <span class="it-tag"><i class="fa-solid fa-coins"></i> Budget Review</span>
+              <span class="it-tag"><i class="fa-solid fa-arrow-trend-up"></i> Grade Analysis</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="inspection-panels reveal">
+        <div class="ip-card">
+          <div class="ip-icon"><i class="fa-solid fa-users-gear"></i></div>
+          <div class="ip-title">Zonal Inspection Teams</div>
+          <div class="ip-body">FPAM deploys dedicated inspection teams across Nigeria's six geopolitical zones, each led by a Principal Engineer. Teams are equipped with digital condition-reporting tablets that sync directly to the national asset database in real time — eliminating paper records and reducing data lag.</div>
+        </div>
+        <div class="ip-card" style="margin-top:20px">
+          <div class="ip-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="ip-title">Third-Party Compliance Audit</div>
+          <div class="ip-body">Independent audit firms are engaged annually to cross-verify FPAM's own condition assessments — ensuring objectivity and preventing grade inflation. Audit results are submitted to the Office of the Auditor-General of the Federation and are a matter of public record.</div>
+        </div>
+        <div class="ip-card" style="margin-top:20px">
+          <div class="ip-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <div class="ip-title">Digital Reporting Portal</div>
+          <div class="ip-body">MDAs can submit maintenance requests, track the status of active repairs, and download condition reports for their facilities directly through the FPAM digital portal. All communications are logged with timestamps, creating an auditable trail for every maintenance interaction.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════
+     SECTION C: ASSET VALUATION
+════════════════════════════════ -->
+<section id="valuation" class="valuation-section">
+  <div class="valuation-inner">
+    <div class="valuation-header reveal">
+      <div>
+        <div class="section-tag">Financial Accountability</div>
+        <h2 class="section-title">Federal Asset Valuation &amp; National Balance Sheet</h2>
+      </div>
+      <p class="section-lead" style="margin-top:0">FPAM is the primary source of physical verification data for Nigeria's national balance sheet — ensuring that federal assets are accurately valued, properly recorded, and reported in accordance with the International Public Sector Accounting Standards (IPSAS) framework adopted by the Office of the Accountant-General of the Federation.</p>
+    </div>
+
+    <div class="valuation-grid">
+      <div class="val-card reveal">
+        <div class="val-num">01</div>
+        <div class="val-icon"><i class="fa-solid fa-calculator"></i></div>
+        <div class="val-title">Periodic Revaluation</div>
+        <div class="val-body">All federal buildings are subject to periodic revaluation in line with FIRS and OAGF guidelines. FPAM-certified estate surveyors assess replacement cost, depreciation, and market comparables to arrive at a fair value — ensuring the national balance sheet reflects current economic reality rather than historical acquisition cost.</div>
+      </div>
+      <div class="val-card reveal">
+        <div class="val-num">02</div>
+        <div class="val-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="val-title">IPSAS Compliance Reporting</div>
+        <div class="val-body">Nigeria's transition to accrual-basis IPSAS reporting requires full asset registers with verified values, useful life estimates, and depreciation schedules. FPAM provides the physical data layer — GPS-verified locations, construction years, floor areas, and condition grades — that underpins this statutory requirement.</div>
+      </div>
+      <div class="val-card reveal">
+        <div class="val-num">03</div>
+        <div class="val-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+        <div class="val-title">Encroachment Detection</div>
+        <div class="val-body">A significant proportion of federal properties nationwide are subject to encroachment — illegal occupation, boundary disputes, or unlawful subletting. FPAM's field survey programme identifies encroached assets, initiates legal recovery processes through the Federal Ministry of Justice, and updates records to reflect recovery status.</div>
+      </div>
+      <div class="val-card reveal">
+        <div class="val-num">04</div>
+        <div class="val-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <div class="val-title">Asset Disposal &amp; Rationalisation</div>
+        <div class="val-body">Not every federal asset should remain in government hands. FPAM leads periodic rationalisation reviews — identifying underutilised, redundant, or strategically misplaced properties and recommending them for disposal, transfer to state governments, or conversion to higher-value uses. All disposals are subject to FEC approval.</div>
+      </div>
+      <div class="val-card reveal">
+        <div class="val-num">05</div>
+        <div class="val-icon"><i class="fa-solid fa-landmark"></i></div>
+        <div class="val-title">Heritage Asset Classification</div>
+        <div class="val-body">Certain federal buildings carry historical, architectural, or cultural significance that precludes standard disposal or demolition. FPAM classifies and maintains a register of heritage assets — coordinating with the National Commission for Museums and Monuments to ensure protected structures receive appropriate conservation treatment.</div>
+      </div>
+      <div class="val-card reveal">
+        <div class="val-num">06</div>
+        <div class="val-icon"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="val-title">Capital Budget Planning Support</div>
+        <div class="val-body">By maintaining verified condition data and valuations for every federal asset, FPAM provides the Federal Ministry of Finance with a data-driven basis for capital budget allocation — allowing the government to prioritise spending on the assets with the greatest maintenance need and public value.</div>
+      </div>
+    </div>
+
+    <div class="valuation-bottom reveal">
+      <div>
+        <div class="vb-title">The Federal Estate as a National Financial Asset</div>
+        <p class="vb-body">Nigeria's 2,764+ registered federal buildings represent one of the country's most significant off-balance-sheet resources. Accurate valuation, proper documentation, and active management of this estate — the core mission of FPAM — is not merely an administrative exercise. It is a direct contribution to the integrity of Nigeria's public finances, the attractiveness of the country to investors, and the accountability owed to every Nigerian taxpayer.</p>
+      </div>
+      <div class="vb-metrics">
+        <div class="vb-metric">
+          <div class="vb-metric-num">2,764<span style="font-size:1.2rem">+</span></div>
+          <div class="vb-metric-label">Assets on National Balance Sheet</div>
+        </div>
+        <div class="vb-metric">
+          <div class="vb-metric-num">31</div>
+          <div class="vb-metric-label">MDAs with Verified Asset Registers</div>
+        </div>
+        <div class="vb-metric">
+          <div class="vb-metric-num">IPSAS</div>
+          <div class="vb-metric-label">Accounting Framework</div>
+        </div>
+        <div class="vb-metric">
+          <div class="vb-metric-num">100%</div>
+          <div class="vb-metric-label">Assets GPS Verified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <!-- FOOTER -->
 <footer id="contact">
   <div class="footer-grid">
@@ -1155,6 +1512,7 @@
         <li><i class="fa-solid fa-chevron-right"></i><a href="#mandate">Our Mandate</a></li>
         <li><i class="fa-solid fa-chevron-right"></i><a href="#inventory">Asset Inventory</a></li>
         <li><i class="fa-solid fa-chevron-right"></i><a href="#ministries">Ministry Portfolios</a></li>
+
       </ul>
     </div>
     <div class="footer-col">
