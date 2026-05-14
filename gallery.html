@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Federal Public Assets Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --navy:#1a2e1f;--navy-dark:#0d1a10;--navy-mid:#243b2a;--navy-light:#2f4d37;
+  --sage:#4a7a56;--sage-light:#6a9a76;
+  --platinum:#c8c4bc;--platinum-light:#dedad4;--platinum-pale:#f0eeea;
+  --white:#ffffff;--off-white:#f5f5f3;
+  --gray-50:#efefed;--gray-100:#e0e0dc;--gray-200:#c4c4be;
+  --gray-400:#8a8a82;--gray-600:#5a5a54;--gray-800:#2a2a26;--text:#141410;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--off-white);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");opacity:.4}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(13,26,16,.96);backdrop-filter:blur(24px);border-bottom:1px solid rgba(200,196,188,.1);display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:68px}
+.nav-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+.nav-coat{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:1rem;border:1px solid rgba(255,255,255,.15)}
+.nav-title{color:#fff;font-size:.76rem;font-weight:500;letter-spacing:.04em;line-height:1.3}
+.nav-title span{display:block;color:rgba(255,255,255,.42);font-size:.62rem;font-weight:300;letter-spacing:.07em}
+.nav-links{display:flex;gap:2.2rem}
+.nav-links a{color:rgba(255,255,255,.52);text-decoration:none;font-size:.73rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:color .25s;position:relative}
+.nav-links a.active,.nav-links a:hover{color:rgba(255,255,255,.92)}
+.nav-links a.active::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--platinum-light)}
+
+/* PAGE HERO */
+.page-hero{min-height:50vh;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding-top:68px;background:var(--navy-dark)}
+.hero-bg{position:absolute;inset:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(.35) saturate(.7)}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(7,20,10,.85) 0%,rgba(13,26,16,.6) 50%,rgba(0,0,0,.4) 100%)}
+.hero-bottom-fade{position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(to bottom,transparent,var(--off-white));z-index:2}
+.page-hero-content{position:relative;z-index:3;max-width:1280px;margin:0 auto;padding:80px 5% 120px;width:100%}
+.breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:24px}
+.breadcrumb a{color:rgba(255,255,255,.42);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:color .2s}
+.breadcrumb a:hover{color:rgba(255,255,255,.7)}
+.breadcrumb .sep{color:rgba(255,255,255,.2);font-size:.7rem}
+.breadcrumb .current{color:var(--platinum-light);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase}
+.page-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 16px;border-radius:100px;font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px}
+.page-tag .dot{width:5px;height:5px;border-radius:50%;background:var(--sage-light)}
+.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,5rem);font-weight:800;color:#fff;line-height:1.05;margin-bottom:20px}
+.page-hero h1 em{color:var(--platinum-light);font-style:normal}
+.page-hero p{color:rgba(255,255,255,.65);font-size:1rem;font-weight:300;max-width:540px;line-height:1.8}
+
+/* FILTER BAR */
+.filter-bar{background:#fff;border-bottom:1px solid var(--gray-100);padding:0 5%;display:flex;align-items:center;gap:10px;overflow-x:auto;height:60px;position:sticky;top:68px;z-index:500;box-shadow:0 4px 20px rgba(13,26,16,.06)}
+.filter-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 18px;border-radius:100px;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.filter-pill:hover{border-color:var(--sage);color:var(--sage)}
+.filter-pill.active{background:var(--navy-dark);border-color:var(--navy-dark);color:#fff}
+.filter-pill i{font-size:.65rem}
+
+/* SECTION */
+.section{max-width:1280px;margin:0 auto;padding:70px 5%}
+.section-tag{display:inline-flex;align-items:center;gap:10px;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.section-tag::before{content:'';width:28px;height:1.5px;background:var(--sage);display:block}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.9rem,3.5vw,2.9rem);font-weight:800;color:var(--navy-dark);line-height:1.1;margin-bottom:18px}
+.section-lead{font-size:1rem;color:var(--gray-600);line-height:1.8;font-weight:300;max-width:640px}
+
+/* MASONRY HERO GRID */
+.gallery-hero-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:280px 280px;gap:14px;margin-top:50px}
+.ghi{overflow:hidden;border-radius:14px;position:relative;cursor:pointer}
+.ghi:nth-child(1){grid-column:span 6;grid-row:span 2}
+.ghi:nth-child(2){grid-column:span 3}
+.ghi:nth-child(3){grid-column:span 3}
+.ghi:nth-child(4){grid-column:span 4}
+.ghi:nth-child(5){grid-column:span 2}
+.ghi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+.ghi:hover img{transform:scale(1.07)}
+.ghi-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(7,20,10,.82) 0%,rgba(7,20,10,.1) 50%,transparent 100%);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:22px}
+.ghi:hover .ghi-overlay{opacity:1}
+.ghi-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(200,196,188,.15);border:1px solid rgba(200,196,188,.3);color:var(--platinum-light);padding:3px 10px;border-radius:100px;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;width:fit-content}
+.ghi-name{color:#fff;font-weight:600;font-size:.9rem;line-height:1.3;margin-bottom:5px}
+.ghi-loc{color:rgba(255,255,255,.55);font-size:.74rem;display:flex;align-items:center;gap:5px}
+.ghi-expand{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;opacity:0;transition:opacity .3s;backdrop-filter:blur(8px)}
+.ghi:hover .ghi-expand{opacity:1}
+
+/* CATEGORIES STRIP */
+.categories-section{background:var(--navy-dark);padding:80px 0}
+.categories-inner{max-width:1280px;margin:0 auto;padding:0 5%}
+.categories-section .section-tag{color:var(--platinum-light)}
+.categories-section .section-tag::before{background:var(--platinum)}
+.categories-section .section-title{color:#fff}
+.categories-section .section-lead{color:rgba(255,255,255,.5)}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
+.cat-card{border-radius:14px;overflow:hidden;position:relative;height:220px;cursor:pointer;transition:transform .3s}
+.cat-card:hover{transform:scale(1.02)}
+.cat-card img{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.7);transition:filter .3s}
+.cat-card:hover img{filter:brightness(.7) saturate(.9)}
+.cat-card-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.cat-icon{font-size:1.8rem;color:#fff;margin-bottom:12px;opacity:.9}
+.cat-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:6px}
+.cat-count{font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:.1em;text-transform:uppercase}
+
+/* ALL PHOTOS GRID */
+.photos-section{background:var(--white)}
+.photos-inner{max-width:1280px;margin:0 auto;padding:80px 5%}
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.photo-card{border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:var(--gray-50)}
+.photo-card-img{height:240px;overflow:hidden}
+.photo-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.photo-card:hover .photo-card-img img{transform:scale(1.06)}
+.photo-card-body{padding:18px 20px}
+.photo-card-mda{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:6px}
+.photo-card-name{font-weight:600;font-size:.92rem;color:var(--text);margin-bottom:6px;line-height:1.3}
+.photo-card-meta{display:flex;align-items:center;justify-content:space-between}
+.photo-card-loc{font-size:.75rem;color:var(--gray-400);display:flex;align-items:center;gap:5px}
+.photo-badge{font-size:.64rem;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(26,46,31,.08);color:var(--navy)}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;z-index:9999;background:rgba(5,12,7,.95);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:24px}
+.lightbox.open{display:flex;animation:lbIn .25s ease}
+@keyframes lbIn{from{opacity:0}to{opacity:1}}
+.lb-inner{position:relative;max-width:1000px;width:100%;max-height:90vh;display:flex;flex-direction:column}
+.lb-img-wrap{flex:1;overflow:hidden;border-radius:16px;position:relative;min-height:0}
+.lb-img-wrap img{width:100%;max-height:72vh;object-fit:contain;display:block}
+.lb-close{position:fixed;top:24px;right:24px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:2}
+.lb-close:hover{background:rgba(255,255,255,.2)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2}
+.lb-nav:hover{background:rgba(255,255,255,.22)}
+.lb-prev{left:-64px}
+.lb-next{right:-64px}
+.lb-caption{margin-top:18px;text-align:center}
+.lb-caption-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:6px}
+.lb-caption-loc{font-size:.8rem;color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;gap:6px}
+.lb-counter{position:fixed;top:26px;left:50%;transform:translateX(-50%);font-size:.72rem;color:rgba(255,255,255,.4);letter-spacing:.12em;text-transform:uppercase}
+
+/* STATS STRIP */
+.stats-strip{background:var(--gray-50);border-top:1px solid var(--gray-100);border-bottom:1px solid var(--gray-100);display:grid;grid-template-columns:repeat(4,1fr)}
+.stat-item{padding:32px;border-right:1px solid var(--gray-100);text-align:center}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:900;color:var(--navy-dark);line-height:1}
+.stat-label{font-size:.73rem;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+
+/* FOOTER */
+footer{background:var(--navy-dark);padding:64px 5% 36px;color:rgba(255,255,255,.55);border-top:1px solid rgba(200,196,188,.12)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:50px;margin-bottom:50px}
+.footer-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.footer-logo-icon{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(200,196,188,.18);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.footer-logo-text{color:#fff;font-weight:600;font-size:.88rem;line-height:1.3}
+.footer-logo-text span{display:block;color:rgba(255,255,255,.38);font-size:.68rem;font-weight:300}
+.footer-desc{font-size:.83rem;line-height:1.75;color:rgba(255,255,255,.38);max-width:300px}
+.footer-col h4{color:var(--platinum-light);font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.footer-col ul li a{color:rgba(255,255,255,.42);text-decoration:none;font-size:.83rem;transition:color .2s}
+.footer-col ul li a:hover{color:rgba(255,255,255,.85)}
+.footer-col ul li i{color:var(--platinum);font-size:.7rem;width:14px}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:rgba(255,255,255,.25)}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:1000px){
+  .gallery-hero-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .ghi{grid-column:span 1!important;grid-row:span 1!important;height:200px}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .photos-grid{grid-template-columns:1fr 1fr}
+  .stats-strip{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .lb-prev{left:-10px}.lb-next{right:-10px}
+}
+@media(max-width:600px){
+  .photos-grid{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-coat">🦅</div>
+    <div class="nav-title">Federal Public Assets Management <span>Federal Ministry of Housing &amp; Urban Development</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="about.html">About</a>
+    <a href="mandate.html">Mandate</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="ministries.html">By Ministry</a>
+    <a href="gallery.html" class="active">Gallery</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="hero-bg">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/National_Assembly_of_Nigeria.jpg/1200px-National_Assembly_of_Nigeria.jpg" alt="National Assembly, Abuja">
+  </div>
+  <div class="hero-bottom-fade"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a><span class="sep">/</span><span class="current">Gallery</span>
+    </div>
+    <div class="page-tag"><div class="dot"></div> Visual Reference</div>
+    <h1>Federal Facilities<br><em>Across Nigeria</em></h1>
+    <p>A photographic record of federal government buildings, parastatals, and public infrastructure under the FPAM inventory — from Abuja's Three Arms Zone to state secretariats nationwide.</p>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button class="filter-pill active" onclick="filterGallery('all', this)"><i class="fa-solid fa-border-all"></i> All Facilities</button>
+  <button class="filter-pill" onclick="filterGallery('finance', this)"><i class="fa-solid fa-landmark"></i> Finance</button>
+  <button class="filter-pill" onclick="filterGallery('legislature', this)"><i class="fa-solid fa-building-columns"></i> Legislature</button>
+  <button class="filter-pill" onclick="filterGallery('telecom', this)"><i class="fa-solid fa-satellite-dish"></i> Telecom</button>
+  <button class="filter-pill" onclick="filterGallery('justice', this)"><i class="fa-solid fa-scale-balanced"></i> Justice</button>
+  <button class="filter-pill" onclick="filterGallery('education', this)"><i class="fa-solid fa-graduation-cap"></i> Education</button>
+</div>
+
+<!-- FEATURED GRID -->
+<div class="section">
+  <div class="reveal">
+    <div class="section-tag">Featured</div>
+    <h2 class="section-title">Landmark Federal Structures</h2>
+    <p class="section-lead">Flagship buildings representing the breadth of Nigeria's federal estate — catalogued, photographed, and maintained under FPAM's national stewardship programme.</p>
+  </div>
+  <div class="gallery-hero-grid reveal">
+    <div class="ghi" onclick="openLightbox(0)">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg/1200px-National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg" alt="National Assembly">
+      <div class="ghi-overlay">
+        <div class="ghi-tag"><i class="fa-solid fa-circle" style="font-size:.35rem"></i> Legislature</div>
+        <div class="ghi-name">National Assembly Complex</div>
+        <div class="ghi-loc"><i class="fa-solid fa-location-dot"></i> Three Arms Zone, Abuja</div>
+      </div>
+      <div class="ghi-expand"><i class="fa-solid fa-expand"></i></div>
+    </div>
+    <div class="ghi" onclick="openLightbox(1)">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Central_Bank_of_Nigeria.jpg/800px-Central_Bank_of_Nigeria.jpg" alt="Central Bank of Nigeria">
+      <div class="ghi-overlay">
+        <div class="ghi-tag"><i class="fa-solid fa-circle" style="font-size:.35rem"></i> Finance</div>
+        <div class="ghi-name">Central Bank of Nigeria HQ</div>
+        <div class="ghi-loc"><i class="fa-solid fa-location-dot"></i> CBD, Abuja FCT</div>
+      </div>
+      <div class="ghi-expand"><i class="fa-solid fa-expand"></i></div>
+    </div>
+    <div class="ghi" onclick="openLightbox(2)">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/CenBank.jpg/800px-CenBank.jpg" alt="CBN Building">
+      <div class="ghi-overlay">
+        <div class="ghi-tag"><i class="fa-solid fa-circle" style="font-size:.35rem"></i> Finance</div>
+        <div class="ghi-name">CBN — Abubakar Tafawa Balewa Way</div>
+        <div class="ghi-loc"><i class="fa-solid fa-location-dot"></i> CBD, Abuja FCT</div>
+      </div>
+      <div class="ghi-expand"><i class="fa-solid fa-expand"></i></div>
+    </div>
+    <div class="ghi" onclick="openLightbox(3)">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/National_Assembly_of_Nigeria.jpg/800px-National_Assembly_of_Nigeria.jpg" alt="National Assembly of Nigeria">
+      <div class="ghi-overlay">
+        <div class="ghi-tag"><i class="fa-solid fa-circle" style="font-size:.35rem"></i> Legislature</div>
+        <div class="ghi-name">National Assembly of Nigeria</div>
+        <div class="ghi-loc"><i class="fa-solid fa-location-dot"></i> Three Arms Zone, Abuja</div>
+      </div>
+      <div class="ghi-expand"><i class="fa-solid fa-expand"></i></div>
+    </div>
+    <div class="ghi" onclick="openLightbox(4)">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg/600px-National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg" alt="Senate Wing">
+      <div class="ghi-overlay">
+        <div class="ghi-tag"><i class="fa-solid fa-circle" style="font-size:.35rem"></i> Legislature</div>
+        <div class="ghi-name">National Assembly — Senate Wing</div>
+        <div class="ghi-loc"><i class="fa-solid fa-location-dot"></i> Three Arms Zone, Abuja</div>
+      </div>
+      <div class="ghi-expand"><i class="fa-solid fa-expand"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Landmark Photos</div></div>
+  <div class="stat-item"><div class="stat-num">31</div><div class="stat-label">MDAs Covered</div></div>
+  <div class="stat-item"><div class="stat-num">37</div><div class="stat-label">States &amp; FCT</div></div>
+  <div class="stat-item"><div class="stat-num">2,764<span style="font-size:1.4rem">+</span></div><div class="stat-label">Registered Assets</div></div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="categories-section">
+  <div class="categories-inner">
+    <div class="reveal">
+      <div class="section-tag">By Category</div>
+      <h2 class="section-title">Facilities by Sector</h2>
+      <p class="section-lead">Nigeria's federal estate spans every sector of governance — from financial regulation and legislative chambers to telecommunications and judicial infrastructure.</p>
+    </div>
+    <div class="cat-grid reveal">
+      <div class="cat-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Central_Bank_of_Nigeria.jpg/800px-Central_Bank_of_Nigeria.jpg" alt="Finance">
+        <div class="cat-card-overlay">
+          <div class="cat-icon"><i class="fa-solid fa-landmark"></i></div>
+          <div class="cat-name">Finance &amp; Banking</div>
+          <div class="cat-count">93 CBN Facilities</div>
+        </div>
+      </div>
+      <div class="cat-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/National_Assembly_of_Nigeria.jpg/800px-National_Assembly_of_Nigeria.jpg" alt="Legislature">
+        <div class="cat-card-overlay">
+          <div class="cat-icon"><i class="fa-solid fa-building-columns"></i></div>
+          <div class="cat-name">Legislative</div>
+          <div class="cat-count">11 Assembly Facilities</div>
+        </div>
+      </div>
+      <div class="cat-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg/800px-National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg" alt="Justice">
+        <div class="cat-card-overlay">
+          <div class="cat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="cat-name">Judiciary</div>
+          <div class="cat-count">120 Court Facilities</div>
+        </div>
+      </div>
+      <div class="cat-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/CenBank.jpg/800px-CenBank.jpg" alt="Education">
+        <div class="cat-card-overlay">
+          <div class="cat-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div class="cat-name">Education</div>
+          <div class="cat-count">225 Academic Buildings</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALL PHOTOS -->
+<div class="photos-section">
+  <div class="photos-inner">
+    <div class="reveal">
+      <div class="section-tag">All Photos</div>
+      <h2 class="section-title">Full Photo Reference</h2>
+      <p class="section-lead">Documented photographs from the national asset enumeration exercise, captured by FPAM field teams across Nigeria.</p>
+    </div>
+    <div class="photos-grid reveal" id="photosGrid">
+      <!-- JS populated -->
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">
+        <div class="footer-logo-icon">🦅</div>
+        <div class="footer-logo-text">Federal Public Assets Management <span>Federal Ministry of Housing &amp; Urban Development</span></div>
+      </div>
+      <p class="footer-desc">Ensuring the responsible stewardship of Nigeria's federal public buildings and infrastructure for present and future generations.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><i class="fa-solid fa-chevron-right"></i><a href="about.html">About the Department</a></li>
+        <li><i class="fa-solid fa-chevron-right"></i><a href="mandate.html">Our Mandate</a></li>
+        <li><i class="fa-solid fa-chevron-right"></i><a href="inventory.html">Asset Inventory</a></li>
+        <li><i class="fa-solid fa-chevron-right"></i><a href="ministries.html">Ministry Portfolios</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><i class="fa-solid fa-arrow-up-right-from-square"></i><a href="https://fmhud.gov.ng" target="_blank">FMHUD Website</a></li>
+        <li><i class="fa-solid fa-file-pdf"></i><a href="#">Asset Standards</a></li>
+        <li><i class="fa-solid fa-file-contract"></i><a href="#">Maintenance Policy</a></li>
+        <li><i class="fa-solid fa-chart-bar"></i><a href="#">Annual Reports</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><i class="fa-solid fa-location-dot"></i><a href="#">No. 30, Mabushi Housing Estate, Abuja</a></li>
+        <li><i class="fa-solid fa-envelope"></i><a href="#">fpand@fmhud.gov.ng</a></li>
+        <li><i class="fa-solid fa-globe"></i><a href="#">assets-fpand.org</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Federal Ministry of Housing &amp; Urban Development — Dept. of Federal Public Assets Management</span>
+    <span><i class="fa-solid fa-flag"></i> Federal Republic of Nigeria</span>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-counter" id="lbCounter">1 / 5</div>
+  <button class="lb-close" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="lb-inner">
+    <div class="lb-img-wrap">
+      <button class="lb-nav lb-prev" onclick="lbNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+      <img id="lbImg" src="" alt="">
+      <button class="lb-nav lb-next" onclick="lbNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="lb-caption">
+      <div class="lb-caption-name" id="lbName"></div>
+      <div class="lb-caption-loc"><i class="fa-solid fa-location-dot"></i><span id="lbLoc"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const photos = [
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg/1200px-National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg",name:"National Assembly Complex",loc:"Three Arms Zone, Abuja",mda:"National Assembly",cat:"legislature"},
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Central_Bank_of_Nigeria.jpg/800px-Central_Bank_of_Nigeria.jpg",name:"Central Bank of Nigeria HQ",loc:"CBD, Abuja FCT",mda:"Central Bank of Nigeria",cat:"finance"},
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/CenBank.jpg/800px-CenBank.jpg",name:"CBN — Abubakar Tafawa Balewa Way",loc:"CBD, Abuja FCT",mda:"Central Bank of Nigeria",cat:"finance"},
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/National_Assembly_of_Nigeria.jpg/800px-National_Assembly_of_Nigeria.jpg",name:"National Assembly of Nigeria",loc:"Three Arms Zone, Abuja",mda:"National Assembly",cat:"legislature"},
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg/600px-National_Assembly_Building_with_Mace,_Abuja,_Nigeria.jpg",name:"National Assembly — Senate Wing",loc:"Three Arms Zone, Abuja",mda:"National Assembly",cat:"legislature"},
+  {src:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Central_Bank_of_Nigeria.jpg/600px-Central_Bank_of_Nigeria.jpg",name:"CBN — National Heritage Building",loc:"CBD, Abuja FCT",mda:"Central Bank of Nigeria",cat:"finance"},
+];
+
+const grid = document.getElementById('photosGrid');
+function renderPhotos(filter='all') {
+  const filtered = filter==='all' ? photos : photos.filter(p=>p.cat===filter);
+  grid.innerHTML = filtered.map((p,i)=>`
+    <div class="photo-card reveal" onclick="openLightbox(${photos.indexOf(p)})">
+      <div class="photo-card-img"><img src="${p.src}" alt="${p.name}" loading="lazy"></div>
+      <div class="photo-card-body">
+        <div class="photo-card-mda">${p.mda}</div>
+        <div class="photo-card-name">${p.name}</div>
+        <div class="photo-card-meta">
+          <div class="photo-card-loc"><i class="fa-solid fa-location-dot"></i>${p.loc}</div>
+          <div class="photo-badge">Active</div>
+        </div>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+renderPhotos();
+
+function filterGallery(cat, btn) {
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderPhotos(cat);
+}
+
+// Lightbox
+let lbIdx = 0;
+function openLightbox(idx) {
+  lbIdx = idx;
+  updateLb();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+function lbNav(dir) {
+  lbIdx = (lbIdx + dir + photos.length) % photos.length;
+  updateLb();
+}
+function updateLb() {
+  const p = photos[lbIdx];
+  document.getElementById('lbImg').src = p.src;
+  document.getElementById('lbName').textContent = p.name;
+  document.getElementById('lbLoc').textContent = p.loc;
+  document.getElementById('lbCounter').textContent = `${lbIdx+1} / ${photos.length}`;
+}
+document.getElementById('lightbox').addEventListener('click', function(e){
+  if(e.target===this) closeLightbox();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeLightbox();
+  if(e.key==='ArrowLeft') lbNav(-1);
+  if(e.key==='ArrowRight') lbNav(1);
+});
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

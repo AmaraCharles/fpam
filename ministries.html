@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>By Ministry — Federal Public Assets Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--navy:#1a2e1f;--navy-dark:#0d1a10;--navy-mid:#243b2a;--sage:#4a7a56;--sage-light:#6a9a76;--platinum:#c8c4bc;--platinum-light:#dedad4;--white:#ffffff;--off-white:#f5f5f3;--gray-50:#efefed;--gray-100:#e0e0dc;--gray-400:#8a8a82;--gray-600:#5a5a54;--text:#141410}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--off-white);color:var(--text);overflow-x:hidden}
+.hero-ticker{position:fixed;top:0;left:0;right:0;z-index:1100;background:rgba(13,26,16,0.98);border-bottom:1px solid rgba(200,196,188,0.15);height:30px;display:flex;align-items:center;overflow:hidden;font-size:.66rem;letter-spacing:.08em;color:rgba(255,255,255,0.45)}
+.ticker-label{background:var(--navy-mid);color:var(--platinum-light);font-weight:600;padding:0 16px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;border-right:1px solid rgba(200,196,188,0.15)}
+.ticker-track{display:flex;animation:ticker 42s linear infinite;white-space:nowrap}
+.ticker-item{padding:0 44px;opacity:.55}.ticker-item i{color:var(--platinum);margin-right:6px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+nav{position:fixed;top:30px;left:0;right:0;z-index:1000;background:transparent;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:70px;transition:background .5s,backdrop-filter .5s}
+nav.scrolled{background:rgba(13,26,16,0.94);backdrop-filter:blur(24px);border-bottom:1px solid rgba(200,196,188,0.1)}
+.nav-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+.nav-coat{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid rgba(255,255,255,0.15)}
+.nav-title{color:var(--white);font-size:.78rem;font-weight:500;letter-spacing:.04em;line-height:1.3}
+.nav-title span{display:block;color:rgba(255,255,255,0.42);font-size:.63rem;font-weight:300;letter-spacing:.07em}
+.nav-links{display:flex;gap:2.4rem}
+.nav-links a{color:rgba(255,255,255,0.52);text-decoration:none;font-size:.74rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:color .25s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--platinum-light);transform:scaleX(0);transition:transform .25s;transform-origin:left}
+.nav-links a:hover,.nav-links a.active{color:rgba(255,255,255,0.9)}
+.nav-links a.active::after,.nav-links a:hover::after{transform:scaleX(1)}
+.page-hero{position:relative;min-height:56vh;background:var(--white);display:flex;align-items:flex-end;overflow:hidden;padding-top:100px;border-bottom:1px solid var(--gray-100)}
+.hero-bg-num{position:absolute;right:-2%;bottom:-8%;font-family:'Cormorant Garamond',serif;font-size:28vw;font-weight:800;color:rgba(26,46,31,0.04);line-height:1;pointer-events:none;user-select:none}
+.hero-content{position:relative;z-index:2;width:100%;max-width:1300px;margin:0 auto;padding:0 5% 70px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:flex-end}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:.66rem;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
+.breadcrumb a{color:var(--gray-400);text-decoration:none;transition:color .2s}.breadcrumb a:hover{color:var(--navy)}
+.breadcrumb i{font-size:.48rem}
+.page-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(74,122,86,0.1);border:1px solid rgba(74,122,86,0.22);color:var(--sage);padding:4px 14px;border-radius:100px;font-size:.63rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px}
+.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,4.5vw,4.4rem);font-weight:800;color:var(--navy-dark);line-height:1.07;margin-bottom:16px}
+.page-hero h1 em{font-style:italic;color:var(--sage);font-weight:600}
+.hero-lead{font-size:.93rem;color:var(--gray-600);line-height:1.85;font-weight:300}
+.top3-panel{background:var(--navy-dark);border-radius:20px;padding:28px;min-width:300px}
+.top3-title{font-size:.63rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:20px}
+.top3-item{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.top3-item:last-child{margin-bottom:0}
+.top3-rank{width:28px;height:28px;border-radius:50%;background:rgba(74,122,86,0.2);border:1px solid rgba(74,122,86,0.3);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--sage-light);flex-shrink:0}
+.top3-rank.gold{background:rgba(184,180,172,0.15);border-color:rgba(184,180,172,0.3);color:var(--platinum-light)}
+.top3-info{flex:1;min-width:0}
+.top3-name{font-size:.78rem;font-weight:500;color:rgba(255,255,255,0.8);line-height:1.3;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top3-bar-bg{height:4px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.top3-bar-fill{height:100%;background:var(--sage);border-radius:4px}
+.top3-count{font-size:.72rem;color:rgba(255,255,255,0.4);flex-shrink:0}
+
+/* CONTROLS */
+.controls-bar{background:var(--white);border-bottom:1px solid var(--gray-100);padding:14px 5%;position:sticky;top:100px;z-index:50}
+.controls-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:.78rem}
+#searchInput{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--gray-100);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.8rem;color:var(--text);background:var(--gray-50);outline:none;transition:border-color .2s,background .2s}
+#searchInput:focus{border-color:var(--sage);background:var(--white)}
+.sort-group{display:flex;gap:2px;background:var(--gray-50);border:1px solid var(--gray-100);border-radius:8px;overflow:hidden}
+.sort-btn{padding:8px 14px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:.74rem;color:var(--gray-600);cursor:pointer;transition:all .2s;white-space:nowrap}
+.sort-btn.active{background:var(--navy-dark);color:var(--white)}
+.view-group{display:flex;gap:2px;background:var(--gray-50);border:1px solid var(--gray-100);border-radius:8px;overflow:hidden;margin-left:auto}
+.view-btn{padding:8px 12px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:.8rem;color:var(--gray-600);cursor:pointer;transition:all .2s}
+.view-btn.active{background:var(--navy-dark);color:var(--white)}
+#resultCount{font-size:.76rem;color:var(--gray-600)}
+
+/* CARDS VIEW */
+.content-area{padding:40px 5% 80px}
+.content-inner{max-width:1300px;margin:0 auto}
+.ministries-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--gray-100)}
+.min-card{background:var(--white);padding:28px;transition:background .2s;cursor:default}
+.min-card:hover{background:var(--gray-50)}
+.min-card-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.min-icon{width:42px;height:42px;border-radius:10px;background:rgba(26,46,31,0.06);display:flex;align-items:center;justify-content:center;font-size:.92rem;color:var(--navy);flex-shrink:0}
+.min-name{font-size:.88rem;font-weight:600;color:var(--navy-dark);line-height:1.3;flex:1;min-width:0}
+.min-count{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--navy-dark);flex-shrink:0}
+.min-bar-bg{height:6px;background:var(--gray-100);border-radius:6px;overflow:hidden;margin-bottom:8px}
+.min-bar-fill{height:100%;background:linear-gradient(90deg,var(--sage),var(--sage-light));border-radius:6px;transition:width 1s ease}
+.min-bar-label{display:flex;justify-content:space-between;font-size:.67rem;color:var(--gray-400)}
+
+/* CHART VIEW */
+.chart-view{display:none;flex-direction:column;gap:6px}
+.chart-view.active{display:flex}
+.chart-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--gray-50)}
+.chart-row:last-child{border-bottom:none}
+.chart-rank{width:28px;text-align:right;font-size:.7rem;color:var(--gray-400);font-weight:500;flex-shrink:0}
+.chart-icon{width:28px;height:28px;border-radius:7px;background:rgba(26,46,31,0.06);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--navy);flex-shrink:0}
+.chart-name{font-size:.8rem;font-weight:500;color:var(--navy-dark);min-width:220px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar-wrap{flex:1}
+.chart-bar-bg{height:10px;background:var(--gray-100);border-radius:6px;overflow:hidden}
+.chart-bar-fill{height:100%;background:linear-gradient(90deg,var(--navy-dark),var(--sage));border-radius:6px;transition:width 1s ease}
+.chart-num{width:50px;text-align:right;font-size:.8rem;font-weight:600;color:var(--navy-dark);flex-shrink:0}
+
+footer{background:var(--navy-dark);padding:80px 5% 40px}
+.footer-grid{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:56px}
+.footer-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.footer-logo-icon{font-size:1.5rem}
+.footer-logo-text{font-size:.78rem;font-weight:500;color:rgba(255,255,255,0.78);line-height:1.4}
+.footer-logo-text span{display:block;font-size:.63rem;color:rgba(255,255,255,0.33);margin-top:2px;font-weight:300}
+.footer-desc{font-size:.76rem;color:rgba(255,255,255,0.33);line-height:1.85;font-weight:300}
+.footer-col h4{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:18px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col li{display:flex;align-items:center;gap:10px;font-size:.76rem;color:rgba(255,255,255,0.4)}
+.footer-col li i{font-size:.58rem;color:var(--sage-light)}
+.footer-col a{color:rgba(255,255,255,0.4);text-decoration:none;transition:color .2s}
+.footer-col a:hover{color:rgba(255,255,255,0.82)}
+.footer-bottom{max-width:1300px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.06);padding-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:.66rem;color:rgba(255,255,255,0.22);letter-spacing:.04em}
+@media(max-width:1000px){.ministries-grid{grid-template-columns:1fr}.chart-name{min-width:140px;max-width:140px}}
+@media(max-width:900px){nav{padding:0 1.5rem}.nav-links{display:none}.hero-content{grid-template-columns:1fr}.top3-panel{display:none}.footer-grid{grid-template-columns:1fr 1fr}.controls-bar{position:static}}
+@media(max-width:600px){.footer-grid{grid-template-columns:1fr}.sort-group{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="hero-ticker">
+  <div class="ticker-label"><i class="fa-solid fa-broadcast-tower"></i> Live</div>
+  <div class="ticker-track">
+    <span class="ticker-item"><i class="fa-solid fa-building"></i> 2,764+ Federal Assets Catalogued Nationwide</span>
+    <span class="ticker-item"><i class="fa-solid fa-sitemap"></i> 31 Federal Ministries &amp; Agencies — Fully Inventoried</span>
+    <span class="ticker-item"><i class="fa-solid fa-map-location-dot"></i> Coverage Across All 36 States + FCT Abuja</span>
+    <span class="ticker-item"><i class="fa-solid fa-shield-halved"></i> FPAM — Under the Federal Ministry of Housing &amp; Urban Development</span>
+    <span class="ticker-item"><i class="fa-solid fa-building"></i> 2,764+ Federal Assets Catalogued Nationwide</span>
+    <span class="ticker-item"><i class="fa-solid fa-sitemap"></i> 31 Federal Ministries &amp; Agencies — Fully Inventoried</span>
+    <span class="ticker-item"><i class="fa-solid fa-map-location-dot"></i> Coverage Across All 36 States + FCT Abuja</span>
+    <span class="ticker-item"><i class="fa-solid fa-shield-halved"></i> FPAM — Under the Federal Ministry of Housing &amp; Urban Development</span>
+  </div>
+</div>
+<nav id="mainNav">
+  <a class="nav-brand" href="./index.html">
+    <div class="nav-coat">🦅</div>
+    <div class="nav-title">Federal Public Assets Management <span>Federal Ministry of Housing &amp; Urban Development</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="./about.html">About</a>
+    <a href="./mandate.html">Mandate</a>
+    <a href="./inventory.html">Inventory</a>
+    <a href="./ministries.html" class="active">By Ministry</a>
+    <a href="./gallery.html">Gallery</a>
+    <a href="./contact.html">Contact</a>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="hero-bg-num">31</div>
+  <div class="hero-content">
+    <div>
+      <div class="breadcrumb"><a href="./index.html">Home</a><i class="fa-solid fa-chevron-right"></i><span>By Ministry</span></div>
+      <div class="page-tag"><i class="fa-solid fa-sitemap"></i> Portfolio Analysis</div>
+      <h1>Assets by Ministry<em>&amp; Agency</em></h1>
+      <p class="hero-lead">A breakdown of facilities under each federal ministry and agency — reflecting the scope and reach of the federal government's physical infrastructure across 31 MDAs.</p>
+    </div>
+    <div class="top3-panel">
+      <div class="top3-title"><i class="fa-solid fa-trophy"></i> &nbsp;Top 3 by Asset Count</div>
+      <div class="top3-item"><div class="top3-rank gold">1</div><div class="top3-info"><div class="top3-name">Federal Road Safety Corps</div><div class="top3-bar-bg"><div class="top3-bar-fill" style="width:100%"></div></div></div><div class="top3-count">229</div></div>
+      <div class="top3-item"><div class="top3-rank">2</div><div class="top3-info"><div class="top3-name">Federal Ministry of Education</div><div class="top3-bar-bg"><div class="top3-bar-fill" style="width:98%"></div></div></div><div class="top3-count">225</div></div>
+      <div class="top3-item"><div class="top3-rank">3</div><div class="top3-info"><div class="top3-name">Federal Ministry of Health</div><div class="top3-bar-bg"><div class="top3-bar-fill" style="width:88%"></div></div></div><div class="top3-count">202</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="controls-bar">
+  <div class="controls-inner">
+    <div class="search-wrap"><span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span><input type="text" id="searchInput" placeholder="Search ministries and agencies…"></div>
+    <div class="sort-group">
+      <button class="sort-btn active" onclick="setSort('most',this)">Most Assets</button>
+      <button class="sort-btn" onclick="setSort('least',this)">Fewest</button>
+      <button class="sort-btn" onclick="setSort('az',this)">A – Z</button>
+    </div>
+    <span id="resultCount"></span>
+    <div class="view-group">
+      <button class="view-btn active" onclick="setView('cards',this)" title="Cards"><i class="fa-solid fa-th-large"></i></button>
+      <button class="view-btn" onclick="setView('chart',this)" title="Chart"><i class="fa-solid fa-chart-bar"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="content-area">
+  <div class="content-inner">
+    <div class="ministries-grid" id="ministriesGrid"></div>
+    <div class="chart-view" id="chartView"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><div class="footer-logo"><div class="footer-logo-icon">🦅</div><div class="footer-logo-text">Federal Public Assets Management<span>Federal Ministry of Housing &amp; Urban Development</span></div></div><p class="footer-desc">Ensuring the responsible stewardship of Nigeria's federal public buildings and infrastructure for present and future generations.</p></div>
+    <div class="footer-col"><h4>Quick Links</h4><ul><li><i class="fa-solid fa-chevron-right"></i><a href="./about.html">About the Department</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./mandate.html">Our Mandate</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./inventory.html">Asset Inventory</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./ministries.html">Ministry Portfolios</a></li></ul></div>
+    <div class="footer-col"><h4>Resources</h4><ul><li><i class="fa-solid fa-arrow-up-right-from-square"></i><a href="https://fmhud.gov.ng" target="_blank">FMHUD Website</a></li><li><i class="fa-solid fa-file-pdf"></i><a href="#">Asset Standards</a></li><li><i class="fa-solid fa-file-contract"></i><a href="#">Maintenance Policy</a></li><li><i class="fa-solid fa-chart-bar"></i><a href="#">Annual Reports</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><i class="fa-solid fa-location-dot"></i><a href="#">No. 30, Mabushi Housing Estate, Abuja</a></li><li><i class="fa-solid fa-envelope"></i><a href="#">fpand@fmhud.gov.ng</a></li><li><i class="fa-solid fa-globe"></i><a href="https://assets-fpand.org" target="_blank">assets-fpand.org</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 Federal Ministry of Housing &amp; Urban Development — Dept. of Federal Public Assets Management</span><span><i class="fa-solid fa-flag"></i> Federal Republic of Nigeria</span></div>
+</footer>
+
+<script>
+const nav=document.getElementById('mainNav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>60),{passive:true});
+
+const ministryData=[
+  {name:"Federal Road Safety Corps",mdas:229,fa:"fa-solid fa-road"},
+  {name:"Federal Ministry of Education",mdas:225,fa:"fa-solid fa-graduation-cap"},
+  {name:"Federal Ministry of Health",mdas:202,fa:"fa-solid fa-hospital"},
+  {name:"Federal Judiciary",mdas:120,fa:"fa-solid fa-scale-balanced"},
+  {name:"Federal Ministry of Foreign Affairs",mdas:116,fa:"fa-solid fa-globe"},
+  {name:"Central Bank of Nigeria",mdas:93,fa:"fa-solid fa-landmark"},
+  {name:"Presidency",mdas:57,fa:"fa-solid fa-star"},
+  {name:"Federal Ministry of Science & Technology",mdas:56,fa:"fa-solid fa-flask"},
+  {name:"Federal Ministry of Agriculture",mdas:52,fa:"fa-solid fa-wheat-awn"},
+  {name:"Federal Ministry of Finance",mdas:49,fa:"fa-solid fa-coins"},
+  {name:"Federal Ministry of Works & Housing",mdas:43,fa:"fa-solid fa-hard-hat"},
+  {name:"Federal Ministry of Labour",mdas:37,fa:"fa-solid fa-person-digging"},
+  {name:"Federal Ministry of Info & Culture",mdas:36,fa:"fa-solid fa-tv"},
+  {name:"INEC",mdas:35,fa:"fa-solid fa-ballot-check"},
+  {name:"Federal Ministry of Defence",mdas:31,fa:"fa-solid fa-shield"},
+  {name:"Federal Ministry of Industry",mdas:26,fa:"fa-solid fa-industry"},
+  {name:"EFCC",mdas:22,fa:"fa-solid fa-lock"},
+  {name:"ICPC",mdas:22,fa:"fa-solid fa-magnifying-glass"},
+  {name:"Public Complaints Commission",mdas:21,fa:"fa-solid fa-clipboard"},
+  {name:"Federal Ministry of Transport",mdas:19,fa:"fa-solid fa-plane"},
+  {name:"Federal Ministry of Water Resources",mdas:17,fa:"fa-solid fa-droplet"},
+  {name:"Federal Ministry of Environment",mdas:15,fa:"fa-solid fa-leaf"},
+  {name:"Federal Ministry of Communication",mdas:14,fa:"fa-solid fa-satellite-dish"},
+  {name:"National Assembly",mdas:11,fa:"fa-solid fa-building-columns"},
+  {name:"Federal Ministry of Power",mdas:10,fa:"fa-solid fa-bolt"},
+  {name:"Federal Ministry of Mines & Steel",mdas:8,fa:"fa-solid fa-hammer"},
+  {name:"Federal Ministry of Petroleum",mdas:7,fa:"fa-solid fa-oil-well"},
+  {name:"Federal Ministry of Sports & Youth",mdas:3,fa:"fa-solid fa-trophy"},
+  {name:"Federal Ministry of Women Affairs",mdas:3,fa:"fa-solid fa-venus"},
+  {name:"Federal Ministry of Niger Delta",mdas:3,fa:"fa-solid fa-water"},
+  {name:"Federal Ministry of Budget",mdas:3,fa:"fa-solid fa-chart-pie"},
+];
+
+const maxMdas=Math.max(...ministryData.map(m=>m.mdas));
+let currentSort='most',currentView='cards',currentSearch='';
+let filtered=[...ministryData];
+
+function applySort(){
+  if(currentSort==='most')filtered.sort((a,b)=>b.mdas-a.mdas);
+  else if(currentSort==='least')filtered.sort((a,b)=>a.mdas-b.mdas);
+  else filtered.sort((a,b)=>a.name.localeCompare(b.name));
+}
+
+function applySearch(){
+  filtered=ministryData.filter(m=>m.name.toLowerCase().includes(currentSearch.toLowerCase()));
+}
+
+function render(){
+  applySearch();applySort();
+  document.getElementById('resultCount').textContent=filtered.length+' of '+ministryData.length+' MDAs';
+  
+  // Cards
+  const grid=document.getElementById('ministriesGrid');
+  grid.innerHTML=filtered.map(m=>{
+    const pct=Math.round((m.mdas/maxMdas)*100);
+    return`<div class="min-card"><div class="min-card-head"><div class="min-icon"><i class="${m.fa}"></i></div><div class="min-name">${m.name}</div><div class="min-count">${m.mdas}</div></div><div class="min-bar-bg"><div class="min-bar-fill" style="width:${pct}%"></div></div><div class="min-bar-label"><span>Assets / Facilities</span><span>${pct}% of max</span></div></div>`;
+  }).join('');
+
+  // Chart
+  const chart=document.getElementById('chartView');
+  chart.innerHTML=filtered.map((m,i)=>{
+    const pct=Math.round((m.mdas/maxMdas)*100);
+    return`<div class="chart-row"><div class="chart-rank">${i+1}</div><div class="chart-icon"><i class="${m.fa}"></i></div><div class="chart-name">${m.name}</div><div class="chart-bar-wrap"><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div></div><div class="chart-num">${m.mdas}</div></div>`;
+  }).join('');
+}
+
+function setSort(s,el){
+  currentSort=s;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function setView(v,el){
+  currentView=v;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ministriesGrid').style.display=v==='cards'?'grid':'none';
+  document.getElementById('chartView').classList.toggle('active',v==='chart');
+}
+
+document.getElementById('searchInput').addEventListener('input',e=>{currentSearch=e.target.value;render();});
+render();
+</script>
+</body>
+</html>

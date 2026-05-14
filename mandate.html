@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandate — Federal Public Assets Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--navy:#1a2e1f;--navy-dark:#0d1a10;--navy-mid:#243b2a;--navy-light:#2f4d37;--sage:#4a7a56;--sage-light:#6a9a76;--platinum:#c8c4bc;--platinum-light:#dedad4;--white:#ffffff;--off-white:#f5f5f3;--gray-100:#e0e0dc;--gray-600:#5a5a54;--text:#141410}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--navy-dark);color:var(--white);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:1}
+.hero-ticker{position:fixed;top:0;left:0;right:0;z-index:1100;background:rgba(5,12,7,0.98);border-bottom:1px solid rgba(200,196,188,0.1);height:30px;display:flex;align-items:center;overflow:hidden;font-size:.66rem;letter-spacing:.08em;color:rgba(255,255,255,0.38)}
+.ticker-label{background:var(--navy-mid);color:var(--platinum-light);font-weight:600;padding:0 16px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;border-right:1px solid rgba(200,196,188,0.12)}
+.ticker-track{display:flex;animation:ticker 42s linear infinite;white-space:nowrap}
+.ticker-item{padding:0 44px;opacity:.5}.ticker-item i{color:var(--platinum);margin-right:6px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+nav{position:fixed;top:30px;left:0;right:0;z-index:1000;background:rgba(13,26,16,0.6);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:70px;border-bottom:1px solid rgba(200,196,188,0.07);transition:background .5s}
+nav.scrolled{background:rgba(5,12,7,0.97)}
+.nav-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+.nav-coat{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:1.05rem;border:1px solid rgba(255,255,255,0.12)}
+.nav-title{color:var(--white);font-size:.78rem;font-weight:500;letter-spacing:.04em;line-height:1.3}
+.nav-title span{display:block;color:rgba(255,255,255,0.35);font-size:.63rem;font-weight:300;letter-spacing:.07em}
+.nav-links{display:flex;gap:2.4rem}
+.nav-links a{color:rgba(255,255,255,0.45);text-decoration:none;font-size:.74rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:color .25s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--platinum-light);transform:scaleX(0);transition:transform .25s;transform-origin:left}
+.nav-links a:hover,.nav-links a.active{color:rgba(255,255,255,0.9)}
+.nav-links a.active::after,.nav-links a:hover::after{transform:scaleX(1)}
+
+/* HERO */
+.page-hero{position:relative;min-height:72vh;background:var(--navy-dark);display:flex;align-items:flex-end;overflow:hidden;padding-top:100px}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 100% 80% at 50% 120%,rgba(74,122,86,0.15) 0%,transparent 60%)}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(200,196,188,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,196,188,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:linear-gradient(to bottom,transparent 0%,black 40%,black 70%,transparent 100%)}
+.hero-rings{position:absolute;right:-150px;bottom:-150px;width:700px;height:700px}
+.hero-rings svg{width:100%;height:100%;opacity:0.07}
+.hero-content{position:relative;z-index:2;width:100%;max-width:1300px;margin:0 auto;padding:0 5% 80px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:.66rem;color:rgba(255,255,255,0.28);letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
+.breadcrumb a{color:rgba(255,255,255,0.28);text-decoration:none;transition:color .2s}.breadcrumb a:hover{color:rgba(255,255,255,0.6)}
+.breadcrumb i{font-size:.48rem}
+.page-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(74,122,86,0.12);border:1px solid rgba(74,122,86,0.28);color:var(--sage-light);padding:4px 14px;border-radius:100px;font-size:.63rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:var(--sage-light);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5.5vw,5.2rem);font-weight:800;color:var(--white);line-height:1.04;margin-bottom:24px}
+.page-hero h1 em{font-style:italic;color:var(--platinum-light);display:block;font-weight:400;font-size:0.76em}
+.hero-lead{font-size:.97rem;color:rgba(255,255,255,0.55);max-width:560px;line-height:1.85;font-weight:300;margin-bottom:36px}
+.mandate-pills{display:flex;flex-wrap:wrap;gap:10px}
+.mandate-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.04);border:1px solid rgba(200,196,188,0.1);color:rgba(255,255,255,0.55);padding:7px 16px;border-radius:100px;font-size:.68rem;font-weight:500;letter-spacing:.06em}
+.mandate-pill i{color:var(--sage-light);font-size:.72rem}
+
+/* MANDATE CARDS */
+.mandates-section{padding:100px 5%;background:var(--navy-dark)}
+.mandates-inner{max-width:1300px;margin:0 auto}
+.mandates-header{margin-bottom:60px}
+.section-tag{font-size:.63rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--sage-light);margin-bottom:12px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.9rem,3.2vw,2.9rem);font-weight:700;color:var(--white);line-height:1.15;margin-bottom:14px}
+.section-lead{font-size:.95rem;color:rgba(255,255,255,0.42);line-height:1.85;font-weight:300;max-width:680px}
+.mandates-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,0.04)}
+.mandate-card{background:var(--navy-dark);padding:40px 36px;position:relative;overflow:hidden;transition:background .3s;border:1px solid rgba(200,196,188,0.06)}
+.mandate-card:hover{background:rgba(255,255,255,0.04)}
+.mandate-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--sage);transition:height .4s ease}
+.mandate-card:hover::before{height:100%}
+.mandate-num{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:800;color:rgba(255,255,255,0.04);line-height:1;position:absolute;top:16px;right:20px;transition:color .3s}
+.mandate-card:hover .mandate-num{color:rgba(74,122,86,0.08)}
+.mandate-icon{width:48px;height:48px;border-radius:12px;background:rgba(74,122,86,0.1);border:1px solid rgba(74,122,86,0.2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--sage-light);margin-bottom:20px}
+.mandate-tag{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-light);margin-bottom:10px;opacity:.7}
+.mandate-title{font-size:.95rem;font-weight:600;color:var(--white);margin-bottom:12px;line-height:1.4}
+.mandate-body{font-size:.78rem;color:rgba(255,255,255,0.4);line-height:1.8;font-weight:300}
+
+/* LEGAL FRAMEWORK */
+.legal-section{padding:100px 5%;background:rgba(5,12,7,0.6)}
+.legal-inner{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.legal-docs{margin-top:40px;display:flex;flex-direction:column;gap:2px}
+.legal-doc{display:flex;align-items:flex-start;gap:20px;padding:24px;background:rgba(255,255,255,0.025);border:1px solid rgba(200,196,188,0.06);transition:background .3s,border-color .3s;cursor:default}
+.legal-doc:hover{background:rgba(255,255,255,0.05);border-color:rgba(74,122,86,0.2)}
+.doc-icon{width:40px;height:40px;border-radius:10px;background:rgba(74,122,86,0.1);border:1px solid rgba(74,122,86,0.2);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--sage-light);flex-shrink:0}
+.doc-name{font-size:.82rem;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:4px}
+.doc-desc{font-size:.74rem;color:rgba(255,255,255,0.35);line-height:1.6;font-weight:300}
+.authority-block{background:rgba(74,122,86,0.06);border:1px solid rgba(74,122,86,0.15);border-radius:16px;padding:36px}
+.authority-block h3{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--white);margin-bottom:16px}
+.authority-block p{font-size:.82rem;color:rgba(255,255,255,0.45);line-height:1.85;font-weight:300;margin-bottom:20px}
+.auth-items{display:flex;flex-direction:column;gap:12px}
+.auth-item{display:flex;align-items:center;gap:12px;font-size:.78rem;color:rgba(255,255,255,0.55)}
+.auth-item i{color:var(--sage-light);width:16px;text-align:center}
+
+/* KPI CIRCLES */
+.kpi-section{padding:100px 5%;background:var(--navy-dark)}
+.kpi-inner{max-width:1300px;margin:0 auto}
+.kpi-header{margin-bottom:64px}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:rgba(255,255,255,0.04)}
+.kpi-card{background:var(--navy-dark);border:1px solid rgba(200,196,188,0.06);padding:36px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:background .3s}
+.kpi-card:hover{background:rgba(255,255,255,0.04)}
+.kpi-circle{position:relative;width:90px;height:90px;margin-bottom:20px}
+.kpi-circle svg{transform:rotate(-90deg);width:90px;height:90px}
+.kpi-circle circle{fill:none;stroke-width:5;r:38;cx:45;cy:45}
+.kpi-track{stroke:rgba(200,196,188,0.08)}
+.kpi-fill{stroke:var(--sage);stroke-linecap:round;transition:stroke-dashoffset 1.5s ease}
+.kpi-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;color:var(--white)}
+.kpi-label{font-size:.72rem;font-weight:600;color:rgba(255,255,255,0.65);line-height:1.4;margin-bottom:6px}
+.kpi-sub{font-size:.65rem;color:rgba(255,255,255,0.3);line-height:1.5;font-weight:300}
+
+/* FOOTER */
+footer{background:rgba(5,12,7,0.98);padding:80px 5% 40px;border-top:1px solid rgba(200,196,188,0.06)}
+.footer-grid{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:56px}
+.footer-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.footer-logo-icon{font-size:1.5rem}
+.footer-logo-text{font-size:.78rem;font-weight:500;color:rgba(255,255,255,0.78);line-height:1.4}
+.footer-logo-text span{display:block;font-size:.63rem;color:rgba(255,255,255,0.3);margin-top:2px;font-weight:300}
+.footer-desc{font-size:.76rem;color:rgba(255,255,255,0.3);line-height:1.85;font-weight:300}
+.footer-col h4{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:18px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col li{display:flex;align-items:center;gap:10px;font-size:.76rem;color:rgba(255,255,255,0.38)}
+.footer-col li i{font-size:.58rem;color:var(--sage-light)}
+.footer-col a{color:rgba(255,255,255,0.38);text-decoration:none;transition:color .2s}
+.footer-col a:hover{color:rgba(255,255,255,0.8)}
+.footer-bottom{max-width:1300px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:.66rem;color:rgba(255,255,255,0.2);letter-spacing:.04em}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:1100px){.mandates-grid{grid-template-columns:1fr 1fr}.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){nav{padding:0 1.5rem}.nav-links{display:none}.legal-inner{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.mandates-grid,.kpi-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.page-hero h1{font-size:2.4rem}}
+</style>
+</head>
+<body>
+<div class="hero-ticker">
+  <div class="ticker-label"><i class="fa-solid fa-broadcast-tower"></i> Live</div>
+  <div class="ticker-track">
+    <span class="ticker-item"><i class="fa-solid fa-building"></i> 2,764+ Federal Assets Catalogued Nationwide</span>
+    <span class="ticker-item"><i class="fa-solid fa-sitemap"></i> 31 Federal Ministries &amp; Agencies — Fully Inventoried</span>
+    <span class="ticker-item"><i class="fa-solid fa-map-location-dot"></i> Coverage Across All 36 States + FCT Abuja</span>
+    <span class="ticker-item"><i class="fa-solid fa-shield-halved"></i> FPAM — Under the Federal Ministry of Housing &amp; Urban Development</span>
+    <span class="ticker-item"><i class="fa-solid fa-building"></i> 2,764+ Federal Assets Catalogued Nationwide</span>
+    <span class="ticker-item"><i class="fa-solid fa-sitemap"></i> 31 Federal Ministries &amp; Agencies — Fully Inventoried</span>
+    <span class="ticker-item"><i class="fa-solid fa-map-location-dot"></i> Coverage Across All 36 States + FCT Abuja</span>
+    <span class="ticker-item"><i class="fa-solid fa-shield-halved"></i> FPAM — Under the Federal Ministry of Housing &amp; Urban Development</span>
+  </div>
+</div>
+<nav id="mainNav">
+  <a class="nav-brand" href="./index.html">
+    <div class="nav-coat">🦅</div>
+    <div class="nav-title">Federal Public Assets Management <span>Federal Ministry of Housing &amp; Urban Development</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="./about.html">About</a>
+    <a href="./mandate.html" class="active">Mandate</a>
+    <a href="./inventory.html">Inventory</a>
+    <a href="./ministries.html">By Ministry</a>
+    <a href="./gallery.html">Gallery</a>
+    <a href="./contact.html">Contact</a>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="grid-bg"></div>
+  <div class="hero-rings">
+    <svg viewBox="0 0 700 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="350" cy="350" r="340" stroke="white" stroke-width="1"/>
+      <circle cx="350" cy="350" r="270" stroke="white" stroke-width="1"/>
+      <circle cx="350" cy="350" r="200" stroke="white" stroke-width="1"/>
+      <circle cx="350" cy="350" r="130" stroke="white" stroke-width="1"/>
+      <circle cx="350" cy="350" r="60" stroke="white" stroke-width="1" fill="rgba(74,122,86,0.1)"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="breadcrumb"><a href="./index.html">Home</a><i class="fa-solid fa-chevron-right"></i><span>Mandate</span></div>
+    <div class="page-tag"><span class="hero-dot"></span> Core Functions</div>
+    <h1>Our Mandate<em>&amp; Responsibilities</em></h1>
+    <p class="hero-lead">The Department exercises oversight across six key operational pillars, ensuring the federal government's physical infrastructure is managed with efficiency, transparency, and national purpose.</p>
+    <div class="mandate-pills">
+      <span class="mandate-pill"><i class="fa-solid fa-building"></i> Federal Buildings</span>
+      <span class="mandate-pill"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance &amp; Repairs</span>
+      <span class="mandate-pill"><i class="fa-solid fa-database"></i> National Database</span>
+      <span class="mandate-pill"><i class="fa-solid fa-ruler-combined"></i> Standards</span>
+      <span class="mandate-pill"><i class="fa-solid fa-shield-halved"></i> Safety &amp; Access</span>
+    </div>
+  </div>
+</section>
+
+<section class="mandates-section">
+  <div class="mandates-inner">
+    <div class="mandates-header reveal">
+      <div class="section-tag">Six Pillars</div>
+      <h2 class="section-title">Operational Framework</h2>
+      <p class="section-lead">Each pillar represents a core area of FPAM's statutory responsibility — together forming a comprehensive mandate for national asset governance.</p>
+    </div>
+    <div class="mandates-grid">
+      <div class="mandate-card reveal">
+        <div class="mandate-num">01</div>
+        <div class="mandate-icon"><i class="fa-solid fa-building"></i></div>
+        <div class="mandate-tag">Pillar One</div>
+        <div class="mandate-title">Management of Federal Buildings</div>
+        <div class="mandate-body">Responsible for the administration and management of all federal government buildings, offices, secretariats, and other public facilities across Nigeria's 36 states and FCT.</div>
+      </div>
+      <div class="mandate-card reveal" style="transition-delay:.05s">
+        <div class="mandate-num">02</div>
+        <div class="mandate-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <div class="mandate-tag">Pillar Two</div>
+        <div class="mandate-title">Maintenance &amp; Repairs Oversight</div>
+        <div class="mandate-body">Coordinates and oversees the maintenance, repair, cleaning, and facility services for all properties under federal government jurisdiction, on a structured quarterly schedule.</div>
+      </div>
+      <div class="mandate-card reveal" style="transition-delay:.1s">
+        <div class="mandate-num">03</div>
+        <div class="mandate-icon"><i class="fa-solid fa-database"></i></div>
+        <div class="mandate-tag">Pillar Three</div>
+        <div class="mandate-title">National Asset Database</div>
+        <div class="mandate-body">Maintains a real-time, comprehensive inventory of all public assets nationwide — covering location, purpose, valuation, condition assessment, and MDA ownership records.</div>
+      </div>
+      <div class="mandate-card reveal" style="transition-delay:.15s">
+        <div class="mandate-num">04</div>
+        <div class="mandate-icon"><i class="fa-solid fa-ruler-combined"></i></div>
+        <div class="mandate-tag">Pillar Four</div>
+        <div class="mandate-title">Standards Development</div>
+        <div class="mandate-body">Creates, updates, and enforces maintenance standards, efficiency benchmarks, and best practices for asset upkeep, facility management, and government infrastructure operations.</div>
+      </div>
+      <div class="mandate-card reveal" style="transition-delay:.2s">
+        <div class="mandate-num">05</div>
+        <div class="mandate-icon"><i class="fa-solid fa-user-check"></i></div>
+        <div class="mandate-tag">Pillar Five</div>
+        <div class="mandate-title">Third-Party Supervision</div>
+        <div class="mandate-body">Supervises outsourced facility management companies and service providers to ensure contractual obligations and quality standards are consistently met across all federal facilities.</div>
+      </div>
+      <div class="mandate-card reveal" style="transition-delay:.25s">
+        <div class="mandate-num">06</div>
+        <div class="mandate-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="mandate-tag">Pillar Six</div>
+        <div class="mandate-title">Safety &amp; Accessibility</div>
+        <div class="mandate-body">Ensures all federal buildings are structurally safe, operationally functional, and accessible to civil servants and members of the public — meeting national building and safety codes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="legal-section">
+  <div class="legal-inner">
+    <div class="reveal">
+      <div class="section-tag">Legal Basis</div>
+      <h2 class="section-title">Statutory Framework</h2>
+      <p class="section-lead">FPAM's mandate derives from a clear legal and policy foundation, giving it the authority to act on behalf of the Federal Government of Nigeria in all matters concerning public asset management.</p>
+      <div class="legal-docs">
+        <div class="legal-doc"><div class="doc-icon"><i class="fa-solid fa-scroll"></i></div><div><div class="doc-name">Public Assets Management Act</div><div class="doc-desc">Primary enabling legislation establishing FPAM's mandate, powers, and operational scope under federal law.</div></div></div>
+        <div class="legal-doc"><div class="doc-icon"><i class="fa-solid fa-building-columns"></i></div><div><div class="doc-name">Financial Regulations of the FGN</div><div class="doc-desc">Governs procurement, contracting, and expenditure related to asset maintenance and facility management.</div></div></div>
+        <div class="legal-doc"><div class="doc-icon"><i class="fa-solid fa-gavel"></i></div><div><div class="doc-name">Federal Executive Council Directives</div><div class="doc-desc">Policy directives from the FEC establishing priority areas and reform agendas for public asset stewardship.</div></div></div>
+        <div class="legal-doc"><div class="doc-icon"><i class="fa-solid fa-file-signature"></i></div><div><div class="doc-name">FMHUD Ministerial Circulars</div><div class="doc-desc">Operational circulars issued by the Honourable Minister, translating policy into departmental action.</div></div></div>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay:.15s">
+      <div class="authority-block">
+        <h3>Custodial Authority</h3>
+        <p>FPAM exercises full custodial authority over all federal public buildings, facilities, and infrastructure. This authority empowers the Department to:</p>
+        <div class="auth-items">
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Commission independent condition surveys of any federal facility</div>
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Issue maintenance and repair orders to MDAs and custodial agents</div>
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Approve or reject facility management service providers</div>
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Direct reallocation of underutilised federal assets between MDAs</div>
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Report directly to the Honourable Minister on asset conditions</div>
+          <div class="auth-item"><i class="fa-solid fa-check"></i> Engage with the Budget Office on capital maintenance allocations</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;background:rgba(255,255,255,0.025);border:1px solid rgba(200,196,188,0.08);border-radius:12px;padding:24px">
+        <div style="font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-light);margin-bottom:10px">Parent Ministry</div>
+        <div style="font-size:1rem;font-weight:600;color:rgba(255,255,255,0.85);line-height:1.4">Federal Ministry of Housing &amp; Urban Development</div>
+        <div style="font-size:.76rem;color:rgba(255,255,255,0.35);margin-top:6px;font-weight:300">Supervising the Department of Federal Public Assets Management since 1999</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="kpi-section">
+  <div class="kpi-inner">
+    <div class="kpi-header reveal">
+      <div class="section-tag">Performance Metrics</div>
+      <h2 class="section-title">Departmental KPIs</h2>
+      <p class="section-lead">Key performance indicators reflecting FPAM's operational effectiveness across its six mandate pillars — measured quarterly against federal targets.</p>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card reveal" data-pct="90">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="23.9"/></svg><div class="kpi-val">90%</div></div>
+        <div class="kpi-label">Inventory Coverage</div>
+        <div class="kpi-sub">of known federal assets documented</div>
+      </div>
+      <div class="kpi-card reveal" style="transition-delay:.06s" data-pct="77">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="54.9"/></svg><div class="kpi-val">77%</div></div>
+        <div class="kpi-label">Maintenance Compliance</div>
+        <div class="kpi-sub">assets with current maintenance records</div>
+      </div>
+      <div class="kpi-card reveal" style="transition-delay:.12s" data-pct="96">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="9.6"/></svg><div class="kpi-val">96%</div></div>
+        <div class="kpi-label">MDA Enrolment</div>
+        <div class="kpi-sub">of federal MDAs registered in FPAM system</div>
+      </div>
+      <div class="kpi-card reveal" style="transition-delay:.18s" data-pct="70">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="71.6"/></svg><div class="kpi-val">70%</div></div>
+        <div class="kpi-label">Condition Assessed</div>
+        <div class="kpi-sub">assets with completed condition reports</div>
+      </div>
+      <div class="kpi-card reveal" style="transition-delay:.24s" data-pct="85">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="35.8"/></svg><div class="kpi-val">85%</div></div>
+        <div class="kpi-label">3rd-Party Compliance</div>
+        <div class="kpi-sub">outsourced providers meeting standards</div>
+      </div>
+      <div class="kpi-card reveal" style="transition-delay:.3s" data-pct="92">
+        <div class="kpi-circle"><svg viewBox="0 0 90 90"><circle class="kpi-track" cx="45" cy="45" r="38"/><circle class="kpi-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="19.1"/></svg><div class="kpi-val">92%</div></div>
+        <div class="kpi-label">Data Accuracy</div>
+        <div class="kpi-sub">verified asset records in national database</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div><div class="footer-logo"><div class="footer-logo-icon">🦅</div><div class="footer-logo-text">Federal Public Assets Management<span>Federal Ministry of Housing &amp; Urban Development</span></div></div><p class="footer-desc">Ensuring the responsible stewardship of Nigeria's federal public buildings and infrastructure for present and future generations.</p></div>
+    <div class="footer-col"><h4>Quick Links</h4><ul><li><i class="fa-solid fa-chevron-right"></i><a href="./about.html">About the Department</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./mandate.html">Our Mandate</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./inventory.html">Asset Inventory</a></li><li><i class="fa-solid fa-chevron-right"></i><a href="./ministries.html">Ministry Portfolios</a></li></ul></div>
+    <div class="footer-col"><h4>Resources</h4><ul><li><i class="fa-solid fa-arrow-up-right-from-square"></i><a href="https://fmhud.gov.ng" target="_blank">FMHUD Website</a></li><li><i class="fa-solid fa-file-pdf"></i><a href="#">Asset Standards</a></li><li><i class="fa-solid fa-file-contract"></i><a href="#">Maintenance Policy</a></li><li><i class="fa-solid fa-chart-bar"></i><a href="#">Annual Reports</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><i class="fa-solid fa-location-dot"></i><a href="#">No. 30, Mabushi Housing Estate, Abuja</a></li><li><i class="fa-solid fa-envelope"></i><a href="#">fpand@fmhud.gov.ng</a></li><li><i class="fa-solid fa-globe"></i><a href="https://assets-fpand.org" target="_blank">assets-fpand.org</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 Federal Ministry of Housing &amp; Urban Development — Dept. of Federal Public Assets Management</span><span><i class="fa-solid fa-flag"></i> Federal Republic of Nigeria</span></div>
+</footer>
+<script>
+const nav=document.getElementById('mainNav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>60),{passive:true});
+const obs=new IntersectionObserver(e=>e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visible')}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
