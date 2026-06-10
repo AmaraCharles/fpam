@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>File Database — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item active" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">FILE DATABASE</div><div class="breadcrumb">AssetSpatial / Data Tools / Files</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+      <select class="filter-input" id="f-asset" onchange="loadFileDB()" style="font-size:12px;max-width:200px">
+        <option value="">All Assets</option>
+      </select>
+      <select class="filter-input" id="f-type" onchange="loadFileDB()" style="font-size:12px">
+        <option value="">All Types</option>
+        <option value="photo">Photos</option>
+        <option value="video">Videos</option>
+        <option value="pdf">PDFs</option>
+        <option value="excel">Excel Files</option>
+        <option value="document">Documents</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openUploadModal()"><i class="fa-solid fa-upload"></i> Upload File</button>
+    </div>
+  </header>
+  <div id="content">
+    <!-- STATS ROW -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">
+      <div class="surface-card" style="padding:14px 16px">
+        <div style="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Total Files</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;color:var(--accent)" id="fdb-total">—</div>
+      </div>
+      <div class="surface-card" style="padding:14px 16px">
+        <div style="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Photos</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;color:var(--info)" id="fdb-photos">—</div>
+      </div>
+      <div class="surface-card" style="padding:14px 16px">
+        <div style="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Videos</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;color:#a855f7" id="fdb-video">—</div>
+      </div>
+      <div class="surface-card" style="padding:14px 16px">
+        <div style="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Docs / PDFs</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;color:var(--warn)" id="fdb-docs">—</div>
+      </div>
+      <div class="surface-card" style="padding:14px 16px">
+        <div style="font-family:'Space Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Excel Files</div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;color:var(--success)" id="fdb-excel">—</div>
+      </div>
+    </div>
+
+    <!-- FILE TABLE -->
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>File</th><th>Type</th><th>Size</th><th>Asset</th><th>Uploaded</th><th>Description</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="fdb-tbody">
+          <tr><td colspan="7"><div class="empty-state" style="padding:36px">
+            <div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div>
+            <div class="empty-title">No files yet</div>
+            <div class="empty-sub">Upload photos or documents from the Asset detail view or here</div>
+          </div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modal-title">Upload File</div><button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body"><div id="modal-body-inner"></div></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<style>
+.file-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.file-icon.photo{background:rgba(59,158,255,0.12);color:var(--info);}
+.file-icon.doc{background:rgba(240,180,0,0.12);color:var(--warn);}
+.file-icon.excel{background:rgba(0,200,100,0.12);color:var(--accent);}
+.file-icon.other{background:var(--surface2);color:var(--text3);}
+</style>
+
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+
+let allFiles = [];
+
+// ── Detect file category from mimetype / extension ───────────────────────────
+function detectCategory(f) {
+  const mime = (f.contentType || f.mimetype || '').toLowerCase();
+  const name = (f.originalname || f.filename || f.name || '').toLowerCase();
+  if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(name)) return 'photo';
+  if (mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|flv|wmv)$/.test(name)) return 'video';
+  if (mime === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+  if (/spreadsheet|excel|csv/.test(mime) || /\.(xlsx|xls|csv|ods)$/.test(name)) return 'excel';
+  if (/word|msword|document/.test(mime) || /\.(docx|doc|odt|rtf|txt)$/.test(name)) return 'document';
+  return f._fileType || 'other';
+}
+
+function categoryIcon(cat) {
+  const MAP = {
+    photo:    ['photo',    'fa-image',        'var(--info)'],
+    video:    ['video',    'fa-film',          '#a855f7'],
+    pdf:      ['pdf',      'fa-file-pdf',      'var(--danger)'],
+    excel:    ['excel',    'fa-file-excel',    'var(--accent)'],
+    document: ['doc',      'fa-file-lines',    'var(--warn)'],
+    other:    ['other',    'fa-file',          'var(--text3)'],
+  };
+  const [cls, icon, color] = MAP[cat] || MAP.other;
+  return `<div class="file-icon ${cls}"><i class="fa-solid ${icon}" style="color:${color}"></i></div>`;
+}
+
+function categoryTag(cat) {
+  const TAGS = { photo:'tag-blue', video:'tag-purple', pdf:'tag-red', excel:'tag-green', document:'tag-orange', other:'tag-gray' };
+  return `<span class="tag ${TAGS[cat]||'tag-gray'}" style="font-size:9px">${cat.toUpperCase()}</span>`;
+}
+
+// ── Authed fetch → blob download / view ──────────────────────────────────────
+async function _authedFetch(url) {
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + (localStorage.getItem('as_token')||'') } });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.blob();
+}
+
+async function downloadFile(url, filename) {
+  try {
+    const blob = await _authedFetch(url);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'file';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) { toast('Download failed: ' + e.message, 'fa-circle-xmark', true); }
+}
+
+async function viewPhoto(url, name) {
+  try {
+    const blob = await _authedFetch(url);
+    const bUrl = URL.createObjectURL(blob);
+    const lb = document.createElement('div');
+    lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+    lb.innerHTML = `<img src="${bUrl}" style="max-width:92vw;max-height:88vh;border-radius:8px">
+      <button onclick="this.parentElement.remove();URL.revokeObjectURL('${bUrl}')"
+        style="position:absolute;top:20px;right:24px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+        <i class="fa-solid fa-xmark"></i></button>`;
+    lb.onclick = e => { if (e.target === lb) { lb.remove(); URL.revokeObjectURL(bUrl); } };
+    document.body.appendChild(lb);
+  } catch(e) { toast('Could not load image: ' + e.message, 'fa-circle-xmark', true); }
+}
+
+// ── Delete a file ─────────────────────────────────────────────────────────────
+async function deleteFile(assetId, fileId, fileType, rowEl) {
+  if (!confirm('Delete this file? This cannot be undone.')) return;
+  const pathMap = { photo: 'photos', document: 'documents', excel: 'excel', pdf: 'documents', video: 'documents' };
+  const seg = pathMap[fileType] || 'documents';
+  try {
+    await apiFetch(`/assets/${assetId}/${seg}/${fileId}`, { method: 'DELETE' });
+    rowEl?.closest('tr')?.remove();
+    allFiles = allFiles.filter(f => (f._id||f.id||f.fileId) !== fileId);
+    updateStats(allFiles);
+    toast('File deleted');
+    addAudit('FILE_DELETED', assetId, null, fileType + ' file removed');
+  } catch(e) {
+    toast('Delete failed: ' + e.message, 'fa-circle-xmark', true);
+  }
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadFileDB() {
+  const tbody = document.getElementById('fdb-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px"><div class="spinner" style="margin:0 auto"></div></td></tr>';
+
+  const assetFilter = document.getElementById('f-asset')?.value;
+  const typeFilter  = document.getElementById('f-type')?.value;
+
+  try {
+    const r = await apiGetAssets({ limit: 200 });
+    const assetList = r.assets || assets;
+    allFiles = [];
+
+    // Fetch files for all assets in parallel (batched to avoid overwhelming the server)
+    const batch = assetList.slice(0, 100);
+    await Promise.all(batch.map(async a => {
+      const id = a.assetId || a.id;
+      try {
+        const [photos, docs, excels] = await Promise.all([
+          apiFetch(`/assets/${id}/photos`).catch(() => ({})),
+          apiFetch(`/assets/${id}/documents`).catch(() => ({})),
+          apiFetch(`/assets/${id}/excel`).catch(() => ({})),
+        ]);
+        const push = (arr, rawCat) => (arr || []).forEach(f => {
+          const cat = detectCategory({ ...f, _fileType: rawCat });
+          allFiles.push({ ...f, _assetId: id, _assetName: a.name, _fileType: rawCat, _category: cat });
+        });
+        push(photos.files || photos.photos || [], 'photo');
+        push(docs.files   || docs.documents || [], 'document');
+        push(excels.files || excels.excel   || [], 'excel');
+      } catch {}
+    }));
+  } catch {
+    try { allFiles = JSON.parse(localStorage.getItem('asdm_filedb')||'[]'); } catch { allFiles=[]; }
+  }
+
+  let display = [...allFiles];
+  if (assetFilter) display = display.filter(f => f._assetId === assetFilter);
+  if (typeFilter)  display = display.filter(f => {
+    if (typeFilter === 'photo')    return ['photo'].includes(f._category);
+    if (typeFilter === 'video')    return f._category === 'video';
+    if (typeFilter === 'pdf')      return f._category === 'pdf';
+    if (typeFilter === 'excel')    return f._category === 'excel';
+    if (typeFilter === 'document') return f._category === 'document';
+    return true;
+  });
+
+  renderFileDB(display);
+  updateStats(allFiles);
+}
+
+function updateStats(files) {
+  document.getElementById('fdb-total').textContent    = files.length;
+  document.getElementById('fdb-photos').textContent   = files.filter(f=>f._category==='photo').length;
+  document.getElementById('fdb-docs').textContent     = files.filter(f=>['document','pdf'].includes(f._category)).length;
+  document.getElementById('fdb-excel').textContent    = files.filter(f=>f._category==='excel').length;
+  const vEl = document.getElementById('fdb-video');
+  if (vEl) vEl.textContent = files.filter(f=>f._category==='video').length;
+}
+
+function renderFileDB(files) {
+  const tbody = document.getElementById('fdb-tbody');
+  if (!files.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state" style="padding:36px"><div class="empty-icon"><i class="fa-solid fa-folder-open"></i></div><div class="empty-title">No files found</div><div class="empty-sub">Upload files from the Asset detail view or click Upload File above</div></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = files.map(f => {
+    const fid  = f._id || f.id || f.fileId || f.gridfsId || '';
+    const cat  = f._category || detectCategory(f);
+    const name = f.originalname || f.filename || f.name || 'Unnamed';
+    const size = f.length || f.size || 0;
+    const _rawDate = f.uploadDate || f.createdAt || f.metadata?.uploadedAt || null;
+    const _ts = _rawDate ? (typeof _rawDate === 'number' ? _rawDate : new Date(_rawDate).getTime()) : Date.now();
+    const ago  = isNaN(_ts) ? '—' : timeAgo(_ts);
+    const desc = f.metadata?.description || '—';
+
+    const segMap = { photo:'photos', video:'documents', pdf:'documents', excel:'excel', document:'documents' };
+    const apiUrl = `${API_BASE}/assets/${f._assetId}/${segMap[cat]||'documents'}/${fid}`;
+
+    const actions = `
+      ${cat === 'photo' || cat === 'video'
+        ? `<button class="btn btn-ghost btn-xs" title="View" onclick="viewPhoto('${apiUrl}','${escHtml(name)}')"><i class="fa-solid fa-eye"></i></button>`
+        : ''}
+      <button class="btn btn-ghost btn-xs" title="Download" onclick="downloadFile('${apiUrl}','${escHtml(name)}')"><i class="fa-solid fa-download"></i></button>
+      <button class="btn btn-danger btn-xs" title="Delete" onclick="deleteFile('${f._assetId}','${fid}','${cat}',this)"><i class="fa-solid fa-trash"></i></button>`;
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${categoryIcon(cat)}
+          <div>
+            <div style="font-weight:500;font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(name)}">${escHtml(name)}</div>
+            <div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace">${escHtml(f.contentType||f.mimetype||'')}</div>
+          </div>
+        </div>
+      </td>
+      <td>${categoryTag(cat)}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">${size ? (size/1024).toFixed(1)+' KB' : '—'}</td>
+      <td style="font-size:12px;color:var(--accent)">${escHtml(f._assetName||f._assetId||'—')}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">${ago}</td>
+      <td style="font-size:12px;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(desc)}</td>
+      <td><div style="display:flex;gap:4px">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── BULK UPLOAD SYSTEM ───────────────────────────────────────────────────────
+// Queue of { file, assetId, fileType, status, progress, previewUrl }
+let _uploadQueue = [];
+
+// Helper: detect file type from file object
+function _detectFileType(file) {
+  const mime = file.type.toLowerCase();
+  const name = file.name.toLowerCase();
+  if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp)$/.test(name)) return 'photo';
+  if (/spreadsheet|excel/.test(mime) || /\.(xlsx|xls|csv|ods)$/.test(name)) return 'excel';
+  return 'document';
+}
+
+function _fmtSize(bytes) {
+  if (!bytes) return '—';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(2) + ' MB';
+}
+
+function _fileIcon(type) {
+  const MAP = { photo:'fa-image', excel:'fa-file-excel', document:'fa-file-lines', pdf:'fa-file-pdf' };
+  return MAP[type] || 'fa-file';
+}
+function _fileColor(type) {
+  const MAP = { photo:'var(--accent)', excel:'#2DB87B', document:'var(--warn)', pdf:'#e05555' };
+  return MAP[type] || 'var(--text3)';
+}
+
+function openUploadModal() {
+  _uploadQueue = [];
+  const assetOptions = (window._assetMap ? Object.values(window._assetMap) : assets)
+    .map(a => `<option value="${a.assetId||a.id}">${escHtml((a.assetId||a.id)+' — '+(a.name||'Unnamed'))}</option>`)
+    .join('');
+
+  openModal('Bulk Upload Files',
+    `<style>
+      .ul-mode-btn { flex:1;padding:8px;border:1px solid var(--border);background:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s;font-family:inherit; }
+      .ul-mode-btn.active { background:var(--accent);color:#fff;border-color:var(--accent); }
+      .ul-drop-zone { border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg,#F4F6F9);position:relative; }
+      .ul-drop-zone.drag-over { border-color:var(--accent);background:rgba(74,144,217,.06); }
+      .ul-drop-zone input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+      .ul-queue-item { display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:#fff;position:relative;overflow:hidden; }
+      .ul-queue-item .progress-bg { position:absolute;left:0;top:0;bottom:0;background:rgba(74,144,217,.08);transition:width .3s;pointer-events:none; }
+      .ul-thumb { width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid var(--border);flex-shrink:0; }
+      .ul-thumb-icon { width:44px;height:44px;border-radius:6px;background:rgba(74,144,217,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+      .ul-status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+    </style>
+
+    <!-- Mode toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="ul-mode-btn active" id="ul-mode-single" onclick="setULMode('single')">
+        <i class="fa-solid fa-file-arrow-up"></i> Single Asset
+      </button>
+      <button class="ul-mode-btn" id="ul-mode-multi" onclick="setULMode('multi')">
+        <i class="fa-solid fa-layer-group"></i> Multiple Assets
+      </button>
+    </div>
+
+    <!-- Single asset mode: pick one asset, many files -->
+    <div id="ul-panel-single">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);display:block;margin-bottom:5px">Asset *</label>
+          <select class="form-control" id="ul-asset-single" style="font-size:12px">
+            <option value="">— Select asset —</option>
+            ${assetOptions}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);display:block;margin-bottom:5px">File Type</label>
+          <select class="form-control" id="ul-type-single" style="font-size:12px" onchange="updateULAccept()">
+            <option value="photo">Photos</option>
+            <option value="document">Documents</option>
+            <option value="excel">Excel / CSV</option>
+          </select>
+        </div>
+      </div>
+      <div class="ul-drop-zone" id="ul-drop-single"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');addFilesToQueue(event.dataTransfer.files,'single')">
+        <input type="file" id="ul-file-single" multiple accept="image/*"
+          onchange="addFilesToQueue(this.files,'single')">
+        <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block"></i>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Drop files here or click to browse</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Multiple files supported — JPG, PNG, PDF, DOCX, XLSX</div>
+      </div>
+    </div>
+
+    <!-- Multi asset mode: each file row gets its own asset picker -->
+    <div id="ul-panel-multi" style="display:none">
+      <div class="ul-drop-zone" id="ul-drop-multi"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');addFilesToQueue(event.dataTransfer.files,'multi')">
+        <input type="file" id="ul-file-multi" multiple accept="image/*,.pdf,.docx,.doc,.xlsx,.xls,.csv"
+          onchange="addFilesToQueue(this.files,'multi')">
+        <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--accent);margin-bottom:8px;display:block"></i>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Drop files for multiple assets</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Assign each file to a different asset after selecting</div>
+      </div>
+    </div>
+
+    <!-- Queue -->
+    <div id="ul-queue" style="margin-top:14px;max-height:280px;overflow-y:auto"></div>
+
+    <!-- Summary -->
+    <div id="ul-summary" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg,#F4F6F9);border-radius:8px;font-size:12px;color:var(--text2)"></div>`,
+
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-secondary btn-sm" onclick="clearUploadQueue()"><i class="fa-solid fa-xmark"></i> Clear Queue</button>
+     <button class="btn btn-primary" id="ul-submit-btn" onclick="doUploadQueue()" disabled style="opacity:.5">
+       <i class="fa-solid fa-upload"></i> Upload All
+     </button>`
+  );
+}
+
+let _ulMode = 'single';
+function setULMode(mode) {
+  _ulMode = mode;
+  _uploadQueue = [];
+  document.getElementById('ul-panel-single').style.display = mode === 'single' ? '' : 'none';
+  document.getElementById('ul-panel-multi').style.display  = mode === 'multi'  ? '' : 'none';
+  document.getElementById('ul-mode-single').classList.toggle('active', mode === 'single');
+  document.getElementById('ul-mode-multi').classList.toggle('active', mode === 'multi');
+  renderUploadQueue();
+}
+
+function updateULAccept() {
+  const t   = document.getElementById('ul-type-single')?.value;
+  const inp = document.getElementById('ul-file-single');
+  if (!inp) return;
+  inp.accept = t==='photo' ? 'image/*' : t==='document' ? '.pdf,.docx,.doc,.txt,.rtf' : '.xlsx,.xls,.csv,.ods';
+}
+
+function addFilesToQueue(fileList, mode) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+
+  files.forEach(file => {
+    const fileType = _detectFileType(file);
+    const assetId  = mode === 'single'
+      ? (document.getElementById('ul-asset-single')?.value || '')
+      : '';
+    const overrideType = mode === 'single'
+      ? (document.getElementById('ul-type-single')?.value || fileType)
+      : fileType;
+
+    const item = { file, assetId, fileType: overrideType, status: 'queued', progress: 0, previewUrl: null, id: Date.now() + Math.random() };
+
+    // Generate preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        item.previewUrl = e.target.result;
+        renderUploadQueue();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    _uploadQueue.push(item);
+  });
+
+  renderUploadQueue();
+}
+
+function removeFromQueue(idx) {
+  _uploadQueue.splice(idx, 1);
+  renderUploadQueue();
+}
+
+function clearUploadQueue() {
+  _uploadQueue = [];
+  renderUploadQueue();
+}
+
+function renderUploadQueue() {
+  const el = document.getElementById('ul-queue');
+  const submitBtn = document.getElementById('ul-submit-btn');
+  if (!el) return;
+
+  if (!_uploadQueue.length) {
+    el.innerHTML = '';
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '.5'; }
+    const sumEl = document.getElementById('ul-summary');
+    if (sumEl) sumEl.style.display = 'none';
+    return;
+  }
+
+  const assetOptions = (window._assetMap ? Object.values(window._assetMap) : assets)
+    .map(a => `<option value="${a.assetId||a.id}">${escHtml((a.assetId||a.id)+' — '+(a.name||'Unnamed'))}</option>`)
+    .join('');
+
+  el.innerHTML = _uploadQueue.map((item, idx) => {
+    const statusColor = { queued:'#5A6A7A', uploading:'var(--accent)', done:'#2DB87B', error:'#e05555' }[item.status];
+    const statusIcon  = { queued:'fa-clock', uploading:'fa-spinner fa-spin', done:'fa-circle-check', error:'fa-circle-xmark' }[item.status];
+    const sizeStr = _fmtSize(item.file.size);
+
+    const thumb = item.previewUrl
+      ? `<img src="${item.previewUrl}" class="ul-thumb">`
+      : `<div class="ul-thumb-icon"><i class="fa-solid ${_fileIcon(item.fileType)}" style="font-size:18px;color:${_fileColor(item.fileType)}"></i></div>`;
+
+    const assetPicker = (_ulMode === 'multi' && item.status === 'queued')
+      ? `<select onchange="_uploadQueue[${idx}].assetId=this.value;_updateSubmitBtn()"
+           style="font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;color:var(--text);background:#fff;outline:none;max-width:180px;flex-shrink:0">
+           <option value="">— Assign asset —</option>
+           ${assetOptions}
+         </select>`
+      : `<span style="font-size:11px;color:var(--text3);flex-shrink:0">${escHtml(item.assetId||'No asset')}</span>`;
+
+    return `<div class="ul-queue-item" id="ulqi-${idx}">
+      <div class="progress-bg" style="width:${item.progress}%"></div>
+      ${thumb}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(item.file.name)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${escHtml(item.fileType)} · ${sizeStr}</div>
+        ${item.status === 'error' && item.errorMsg ? `<div style="font-size:10px;color:#e05555;margin-top:2px">${escHtml(item.errorMsg)}</div>` : ''}
+      </div>
+      ${assetPicker}
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <i class="fa-solid ${statusIcon}" style="color:${statusColor};font-size:13px"></i>
+        ${item.status === 'queued'
+          ? `<button onclick="removeFromQueue(${idx})" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px;font-size:12px"><i class="fa-solid fa-xmark"></i></button>`
+          : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Summary line
+  const total   = _uploadQueue.length;
+  const done    = _uploadQueue.filter(i => i.status === 'done').length;
+  const errors  = _uploadQueue.filter(i => i.status === 'error').length;
+  const pending = _uploadQueue.filter(i => i.status === 'queued').length;
+  const sumEl   = document.getElementById('ul-summary');
+  if (sumEl) {
+    sumEl.style.display = '';
+    sumEl.innerHTML = `<i class="fa-solid fa-list" style="color:var(--accent);margin-right:6px"></i>
+      <strong>${total}</strong> file${total!==1?'s':''} queued
+      ${done    ? `· <span style="color:#2DB87B"><strong>${done}</strong> uploaded</span>` : ''}
+      ${errors  ? `· <span style="color:#e05555"><strong>${errors}</strong> failed</span>` : ''}
+      ${pending ? `· <strong>${pending}</strong> pending` : ''}`;
+  }
+
+  _updateSubmitBtn();
+}
+
+function _updateSubmitBtn() {
+  const btn = document.getElementById('ul-submit-btn');
+  if (!btn) return;
+  const ready = _uploadQueue.filter(i => i.status === 'queued' && i.assetId);
+  btn.disabled = ready.length === 0;
+  btn.style.opacity = ready.length > 0 ? '1' : '.5';
+  btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload ${ready.length > 0 ? ready.length + ' File' + (ready.length!==1?'s':'') : 'All'}`;
+}
+
+async function doUploadQueue() {
+  const toUpload = _uploadQueue.filter(i => i.status === 'queued' && i.assetId);
+  if (!toUpload.length) { toast('No files ready — assign an asset to each file', 'fa-triangle-exclamation', true); return; }
+
+  const btn = document.getElementById('ul-submit-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
+
+  let done = 0, failed = 0;
+
+  for (const item of toUpload) {
+    item.status   = 'uploading';
+    item.progress = 30;
+    renderUploadQueue();
+
+    try {
+      if (item.fileType === 'photo')       await apiUploadPhoto(item.assetId, item.file);
+      else if (item.fileType === 'excel')  await apiUploadExcel(item.assetId, item.file);
+      else                                  await apiUploadDocument(item.assetId, item.file);
+
+      item.status   = 'done';
+      item.progress = 100;
+      done++;
+      if (typeof addAudit === 'function') addAudit('FILE_UPLOADED', item.assetId, null, item.file.name + ' uploaded');
+    } catch(e) {
+      item.status   = 'error';
+      item.progress = 0;
+      item.errorMsg = e.message || 'Upload failed';
+      failed++;
+    }
+    renderUploadQueue();
+  }
+
+  toast(
+    done > 0
+      ? `${done} file${done!==1?'s':''} uploaded successfully${failed ? ', ' + failed + ' failed' : ''}`
+      : `All uploads failed`,
+    done > 0 ? 'fa-circle-check' : 'fa-circle-xmark',
+    done === 0
+  );
+
+  // Reload file list after a short delay
+  setTimeout(() => {
+    loadFileDB();
+    // Auto-close only if everything succeeded
+    if (failed === 0) closeModal();
+  }, 800);
+}
+
+// Legacy single-file doUpload (kept for backwards compat)
+async function doUpload() { doUploadQueue(); }
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  document.getElementById('modal-overlay')?.addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+  try {
+    const r = await apiGetAssets({ limit: 200 });
+    const list = r.assets || assets;
+    window._assetMap = window._assetMap || {};
+    const sel = document.getElementById('f-asset');
+    list.forEach(a => {
+      window._assetMap[a.assetId||a.id] = a;
+      const o = document.createElement('option');
+      o.value = a.assetId||a.id;
+      o.textContent = (a.assetId||a.id) + ' — ' + (a.name||'Unnamed');
+      sel.appendChild(o);
+    });
+  } catch {}
+
+  loadFileDB();
+});
+</script>
+</body>
+</html>

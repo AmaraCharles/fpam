@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Request Access — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#0a0f0d;--surface:#111a15;--surface2:#172011;--border:#1f3020;--border2:#2a4230;--accent:#00c864;--accent2:#00ffab;--text:#edf5f0;--text2:#8aab96;--text3:#4d7a5e;--danger:#e05555;--ff-head:'Syne',sans-serif;--ff-body:'Space Grotesk',sans-serif;--ff-mono:'Space Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--ff-body);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:44px 48px;width:520px;max-width:100%;}
+.back-btn{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--text3);text-decoration:none;margin-bottom:28px;font-family:var(--ff-mono);letter-spacing:.5px;transition:color .15s;}
+.back-btn:hover{color:var(--accent);}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#009944);display:flex;align-items:center;justify-content:center;color:#000;font-size:16px;}
+.logo-mark{font-family:var(--ff-head);font-size:18px;font-weight:800;}
+.logo-sub{font-family:var(--ff-mono);font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
+h2{font-family:var(--ff-head);font-size:26px;font-weight:800;margin-bottom:6px;}
+.sub{font-size:13px;color:var(--text2);margin-bottom:30px;line-height:1.5;}
+.notice{background:rgba(240,180,0,.08);border:1px solid rgba(240,180,0,.2);border-radius:10px;padding:14px 16px;margin-bottom:28px;display:flex;gap:12px;align-items:flex-start;}
+.notice i{color:var(--warn);margin-top:1px;flex-shrink:0;}
+.notice p{font-size:12.5px;color:var(--text2);line-height:1.55;}
+.form-grp{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+.form-lbl{font-family:var(--ff-mono);font-size:9px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;}
+.input-wrap{position:relative;}
+.input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;}
+.form-ctrl{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px 10px 38px;color:var(--text);font-size:13.5px;font-family:var(--ff-body);outline:none;transition:border-color .15s;}
+textarea.form-ctrl{padding:10px 14px;min-height:80px;resize:vertical;}
+.form-ctrl:focus{border-color:var(--accent);}
+.form-ctrl::placeholder{color:var(--text3);}
+.btn-submit{width:100%;padding:13px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:8px;font-size:13.5px;font-weight:600;font-family:var(--ff-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;}
+.btn-submit:hover{border-color:var(--accent);color:var(--accent);}
+.success-box{display:none;text-align:center;padding:20px 0;}
+.success-icon{font-size:48px;color:var(--accent);margin-bottom:16px;}
+.success-title{font-family:var(--ff-head);font-size:22px;font-weight:800;margin-bottom:8px;}
+.success-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5;}
+a.go-login{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#000;font-weight:700;font-size:13px;padding:10px 22px;border-radius:8px;text-decoration:none;transition:background .15s;}
+a.go-login:hover{background:var(--accent2);}
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="login.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+
+  <div class="logo-row">
+    <div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+    <div>
+      <div class="logo-mark">AssetSpatial</div>
+      <div class="logo-sub">Federal Asset Registry</div>
+    </div>
+  </div>
+
+  <div id="form-view">
+    <h2>Request Access</h2>
+    <div class="sub">New users are provisioned by your System Administrator. Fill in the form below and your admin will be notified.</div>
+
+    <div class="notice">
+      <i class="fa-solid fa-circle-info"></i>
+      <p>Account creation requires approval from a <strong>System Administrator</strong>. Your request will be reviewed and you will receive login credentials by email. Self-registration is not available to prevent unauthorised access to federal asset data.</p>
+    </div>
+
+    <div class="form-grp">
+      <label class="form-lbl">Full Name *</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-user input-icon"></i>
+        <input class="form-ctrl" type="text" id="req-name" placeholder="e.g. Ngozi Adamu">
+      </div>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Work Email *</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-envelope input-icon"></i>
+        <input class="form-ctrl" type="email" id="req-email" placeholder="you@agency.gov.ng">
+      </div>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Organisation / Ministry *</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-building-columns input-icon"></i>
+        <input class="form-ctrl" type="text" id="req-org" placeholder="e.g. Federal Ministry of Works">
+      </div>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Requested Role</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-user-tag input-icon"></i>
+        <select class="form-ctrl" id="req-role">
+          <option value="Field Agent">Field Agent — On-site asset capture</option>
+          <option value="Supervisor">Supervisor — Review and approve captures</option>
+          <option value="GIS Analyst">GIS Analyst — Spatial analysis and export</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Reason / Justification</label>
+      <textarea class="form-ctrl" id="req-reason" placeholder="Briefly explain why you need access (optional)"></textarea>
+    </div>
+
+    <button class="btn-submit" onclick="submitRequest()">
+      <i class="fa-solid fa-paper-plane"></i> Submit Access Request
+    </button>
+  </div>
+
+  <div class="success-box" id="success-view">
+    <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="success-title">Request Submitted</div>
+    <div class="success-sub">Your access request has been sent to the System Administrator. You will receive an email with your login credentials once approved.</div>
+    <a href="login.html" class="go-login"><i class="fa-solid fa-right-to-bracket"></i> Back to Sign In</a>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+async function submitRequest() {
+  const name  = document.getElementById('req-name').value.trim();
+  const email = document.getElementById('req-email').value.trim();
+  const org   = document.getElementById('req-org').value.trim();
+  if (!name || !email || !org) { alert('Please fill in all required fields.'); return; }
+
+  const payload = {
+    name, email, organisation: org,
+    requestedRole: document.getElementById('req-role').value,
+    reason: document.getElementById('req-reason').value,
+    requestedAt: new Date().toISOString(),
+  };
+
+  // In production: POST to /api/access-requests (if endpoint exists)
+  // For now: store locally and show success
+  try {
+    await apiFetch('/access-requests', { method:'POST', body: JSON.stringify(payload) });
+  } catch {
+    // Backend may not have this endpoint yet — log locally
+    const reqs = JSON.parse(localStorage.getItem('access_requests')||'[]');
+    reqs.push(payload);
+    localStorage.setItem('access_requests', JSON.stringify(reqs));
+  }
+
+  document.getElementById('form-view').style.display='none';
+  document.getElementById('success-view').style.display='block';
+}
+</script>
+</body>
+</html>

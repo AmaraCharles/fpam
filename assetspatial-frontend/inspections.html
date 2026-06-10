@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Inspections — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="inspections.html">
+  <i class="fa-solid fa-clipboard-check"></i>Inspections
+</a>
+   
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">INSPECTIONS</div><div class="breadcrumb">AssetSpatial / Inspections</div></div>
+    <div class="header-actions">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+      <button class="btn btn-secondary btn-sm" onclick="generateDeferredMaintenanceReport()"><i class="fa-solid fa-file-pdf"></i> Deferred Report</button>
+      <button class="btn btn-primary btn-sm" onclick="openScheduleInspectionPicker()"><i class="fa-solid fa-plus"></i> Schedule Inspection</button>
+    </div>
+  </header>
+
+  <div id="content">
+    <!-- KPI row -->
+    <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px" id="insp-kpi-row">
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" id="filter-all" onclick="setInspFilter('')" style="border-color:var(--accent);color:var(--accent)">All</button>
+      <button class="btn btn-ghost btn-sm" onclick="setInspFilter('Scheduled')"><i class="fa-solid fa-calendar"></i> Scheduled</button>
+      <button class="btn btn-ghost btn-sm" onclick="setInspFilter('Assigned')"><i class="fa-solid fa-user-check"></i> Assigned</button>
+      <button class="btn btn-ghost btn-sm" onclick="setInspFilter('Submitted')"><i class="fa-solid fa-paper-plane"></i> Awaiting Review</button>
+      <button class="btn btn-ghost btn-sm" onclick="setInspFilter('Approved')"><i class="fa-solid fa-circle-check"></i> Approved</button>
+      <button class="btn btn-ghost btn-sm" onclick="setInspFilter('Rejected')"><i class="fa-solid fa-circle-xmark"></i> Rejected</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Inspection ID</th>
+            <th>Asset</th>
+            <th>Type</th>
+            <th>Scheduled Date</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Finding</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inspections-table">
+          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal" style="width:560px;max-width:95vw">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Inspection</div>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body"><div id="modal-body-inner"></div></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/inspections.js"></script>
+<script src="js/pdf_report_enhanced.js"></script>
+<script>
+let _currentInspFilter = '';
+function setInspFilter(f) {
+  _currentInspFilter = f;
+  document.querySelectorAll('[onclick*="setInspFilter"]').forEach(b => {
+    b.className = 'btn btn-ghost btn-sm';
+    b.style.borderColor = ''; b.style.color = '';
+  });
+  const active = document.querySelector(`[onclick="setInspFilter('${f}')"]`) || document.getElementById('filter-all');
+  if (active) { active.className = 'btn btn-secondary btn-sm'; active.style.borderColor='var(--accent)'; active.style.color='var(--accent)'; }
+  renderInspectionsTable(f);
+}
+
+function renderInspKpis() {
+  const list = _getInspections();
+  const today = new Date().toISOString().slice(0,10);
+  const stats = [
+    { label:'Total',        val:list.length,                                                                           icon:'fa-clipboard-list', color:'var(--accent)' },
+    { label:'Overdue',      val:list.filter(i=>i.scheduledDate<today&&!['Submitted','Approved','Rejected'].includes(i.status)).length, icon:'fa-circle-exclamation', color:'var(--danger)' },
+    { label:'Pending Review',val:list.filter(i=>i.status==='Submitted').length,                                        icon:'fa-paper-plane',    color:'#9b59b6' },
+    { label:'Approved',     val:list.filter(i=>i.status==='Approved').length,                                          icon:'fa-circle-check',   color:'var(--accent)' },
+    { label:'Upcoming 7d',  val:list.filter(i=>i.scheduledDate>=today&&new Date(i.scheduledDate)<=new Date(Date.now()+7*86400000)&&!['Approved','Rejected'].includes(i.status)).length, icon:'fa-calendar-days', color:'var(--info,#4A90D9)' },
+  ];
+  const row = document.getElementById('insp-kpi-row');
+  if (!row) return;
+  row.innerHTML = stats.map(s=>`
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:${s.color}"></div>
+      <div class="stat-icon" style="background:${s.color}22"><i class="fa-solid ${s.icon}" style="color:${s.color}"></i></div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value" style="color:${s.color}">${s.val}</div>
+    </div>`).join('');
+}
+
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  document.getElementById('modal-overlay')?.addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
+  renderInspKpis();
+  renderInspectionsTable();
+});
+</script>
+</body>
+</html>

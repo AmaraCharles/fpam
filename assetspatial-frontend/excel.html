@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Excel Import — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="inspections.html">
+  <i class="fa-solid fa-clipboard-check"></i>Inspections
+</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item active" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">EXCEL IMPORT</div><div class="breadcrumb">AssetSpatial / Data Tools / Excel</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+    </div>
+  </header>
+  <div id="content">
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
+
+      <!-- LEFT: UPLOAD + MAPPING -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <!-- Upload -->
+        <div class="surface-card">
+          <div class="card-header"><div class="card-title"><i class="fa-solid fa-file-excel" style="color:#1d6f42"></i> Upload Sheet</div></div>
+          <div style="padding:18px">
+            <div id="xl-drop" style="border:2px dashed var(--border2);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .15s" onclick="document.getElementById('xl-input').click()">
+              <i class="fa-solid fa-table" style="font-size:28px;color:var(--text3);margin-bottom:10px;display:block"></i>
+              <div style="font-size:13px;color:var(--text2);margin-bottom:4px">Drop .xlsx or .xls here</div>
+              <div style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace">XLSX · XLS · CSV</div>
+              <input type="file" id="xl-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="xlLoad(this.files[0])">
+            </div>
+            <div id="xl-file-info" style="display:none;margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text2)">
+              <i class="fa-solid fa-file-excel" style="color:#1d6f42;margin-right:6px"></i>
+              <span id="xl-filename"></span>
+              <span id="xl-rowcount" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);float:right"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column Mapping -->
+        <div class="surface-card" id="xl-mapping-card" style="display:none">
+          <div class="card-header"><div class="card-title"><i class="fa-solid fa-arrows-left-right" style="color:var(--accent)"></i> Column Mapping</div></div>
+          <div style="padding:14px" id="xl-mapping-body">
+            <!-- Injected -->
+          </div>
+          <div style="padding:0 14px 14px;display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" onclick="autoMapColumns()"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-map</button>
+            <button class="btn btn-primary" style="flex:1" onclick="runImport()" id="xl-import-btn">
+              <i class="fa-solid fa-arrow-right"></i> Continue
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PREVIEW -->
+      <div class="surface-card" style="display:flex;flex-direction:column">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-table-cells" style="color:var(--accent)"></i> Sheet Preview</div>
+          <span id="xl-preview-label" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)"></span>
+        </div>
+        <div id="xl-preview-empty" style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:40px;color:var(--text3)">
+          <i class="fa-solid fa-table" style="font-size:36px;margin-bottom:4px"></i>
+          <div style="font-size:13px">Upload an Excel or CSV file to preview</div>
+          <div style="font-size:11px;font-family:'Space Mono',monospace">Supports .xlsx · .xls · .csv</div>
+        </div>
+        <div id="xl-preview-wrap" style="display:none;overflow:auto;flex:1">
+          <table class="data-table" id="xl-preview-table">
+            <thead id="xl-thead"></thead>
+            <tbody id="xl-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORT RESULTS -->
+    <div class="surface-card" id="xl-results-card" style="margin-top:20px;display:none">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-circle-check" style="color:var(--accent)"></i> Import Results</div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('xl-results-card').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding:16px" id="xl-results-body"></div>
+    </div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<style>
+#xl-drop.over{border-color:var(--accent);background:var(--surface2);}
+.map-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.map-row:last-child{border-bottom:none;}
+.map-src{flex:1;font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.map-arrow{color:var(--text3);font-size:10px;flex-shrink:0;}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+
+let xlHeaders = [], xlData = [], xlMappings = {}, _xlFile = null, _xlAssetList = [];
+
+const ASSET_FIELDS = [
+  { key:'', label:'— Skip —' },
+  { key:'name', label:'Asset Name' },
+  { key:'type', label:'Asset Type' },
+  { key:'condition', label:'Condition' },
+  { key:'state', label:'State' },
+  { key:'lga', label:'LGA' },
+  { key:'lat', label:'Latitude' },
+  { key:'lng', label:'Longitude' },
+  { key:'material', label:'Material' },
+  { key:'area', label:'Area/Dimension' },
+  { key:'notes', label:'Notes' },
+  { key:'agent', label:'Field Agent' },
+  { key:'date', label:'Capture Date' },
+];
+
+const KEYWORD_MAP = {
+  name:['name','asset name','title','description'],
+  type:['type','asset type','category','class'],
+  condition:['condition','state of repair','quality'],
+  state:['state','region','province'],
+  lga:['lga','local government','district'],
+  lat:['lat','latitude','y','northing'],
+  lng:['lng','lon','longitude','x','easting'],
+  material:['material','construction','made of'],
+  notes:['notes','remarks','comment','observation'],
+  agent:['agent','captured by','officer','inspector'],
+  date:['date','capture date','survey date'],
+};
+
+function xlLoad(file) {
+  if (!file) return;
+  _xlFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+      if (raw.length < 2) { toast('Sheet appears empty','fa-triangle-exclamation',true); return; }
+
+      const r0ne = raw[0].filter(c=>String(c).trim()).length;
+      const r1ne = raw[1] ? raw[1].filter(c=>String(c).trim()).length : 0;
+      const hdrIdx = (r0ne <= 2 && r1ne > r0ne) ? 1 : 0;
+      if (hdrIdx === 1) toast('Row 1 was a title row — using row 2 as headers','fa-circle-info');
+
+      xlHeaders = raw[hdrIdx].map(h=>String(h).trim()).filter(h=>h);
+      xlData = raw.slice(hdrIdx+1).filter(row=>row.some(c=>String(c).trim())).map(row => {
+        const obj = {};
+        xlHeaders.forEach((h,i) => { obj[h] = String(row[i]||'').trim(); });
+        return obj;
+      });
+
+      document.getElementById('xl-filename').textContent = file.name;
+      document.getElementById('xl-rowcount').textContent = xlData.length + ' rows · ' + wb.SheetNames[0];
+      document.getElementById('xl-file-info').style.display='block';
+      document.getElementById('xl-preview-label').textContent = xlData.length + ' rows · Sheet: '+wb.SheetNames[0];
+
+      autoMapColumns();
+      renderPreview(raw.slice(hdrIdx, hdrIdx+7));
+      document.getElementById('xl-mapping-card').style.display='block';
+      document.getElementById('xl-preview-wrap').style.display='block';
+      document.getElementById('xl-preview-empty').style.display='none';
+      document.getElementById('xl-results-card').style.display='none';
+      toast(xlData.length+' rows previewed from '+file.name);
+    } catch(err) { toast('Could not parse: '+err.message,'fa-triangle-exclamation',true); }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function autoMapColumns() {
+  xlMappings = {};
+  xlHeaders.forEach(h => {
+    const lower = h.toLowerCase().replace(/[^a-z0-9]/g,' ');
+    for (const [field, keywords] of Object.entries(KEYWORD_MAP)) {
+      if (keywords.some(k=>lower.includes(k))) { xlMappings[h] = field; break; }
+    }
+  });
+  renderMappingUI();
+}
+
+function renderMappingUI() {
+  const body = document.getElementById('xl-mapping-body');
+  body.innerHTML = xlHeaders.map(h => {
+    const opts = ASSET_FIELDS.map(f=>`<option value="${f.key}" ${xlMappings[h]===f.key?'selected':''}>${f.label}</option>`).join('');
+    return `<div class="map-row">
+      <div class="map-src" title="${escHtml(h)}">${escHtml(h)}</div>
+      <i class="fa-solid fa-arrow-right map-arrow"></i>
+      <select style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px;outline:none;min-width:130px"
+        onchange="xlMappings['${h.replace(/'/g,"\\'")}'] = this.value">${opts}</select>
+    </div>`;
+  }).join('');
+}
+
+function renderPreview(rows) {
+  if (!rows.length) return;
+  const headers = rows[0];
+  document.getElementById('xl-thead').innerHTML = '<tr>'+headers.map(h=>`<th>${escHtml(String(h))}</th>`).join('')+'</tr>';
+  document.getElementById('xl-tbody').innerHTML = rows.slice(1).map(row=>'<tr>'+headers.map((_,i)=>`<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(String(row[i]||''))}</td>`).join('')+'</tr>').join('');
+}
+
+// ── MAIN ACTION — show decision panel immediately, upload on user choice ───────
+async function runImport() {
+  if (!_xlFile) { toast('No file loaded','fa-triangle-exclamation',true); return; }
+  // No backend call yet — just show the attach/save options
+  _showPostUploadOptions(_xlFile.name);
+}
+
+// Load assets for the attach dropdown
+async function _loadAssetsForAttach(selectEl) {
+  selectEl.innerHTML = '<option value="">Loading assets…</option>';
+  try {
+    const r = await apiGetAssets({ limit: 500 });
+    _xlAssetList = r.assets || assets || [];
+  } catch {
+    _xlAssetList = assets || [];
+  }
+  selectEl.innerHTML = '<option value="">— Select an asset —</option>'
+    + _xlAssetList.map(a => {
+        const id = a.assetId || a.id;
+        return `<option value="${escHtml(id)}">${escHtml(id)} — ${escHtml(a.name||'Unnamed')}</option>`;
+      }).join('');
+}
+
+function _showPostUploadOptions(fileName) {
+  const card = document.getElementById('xl-results-card');
+  card.style.display = 'block';
+  document.getElementById('xl-results-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">
+        <i class="fa-solid fa-file-excel" style="color:#1d6f42;margin-right:6px"></i>${escHtml(fileName)}
+      </div>
+      <div style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace">${xlData.length} rows · ready to save</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+      <!-- Option A — Attach to existing asset -->
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">
+          <i class="fa-solid fa-paperclip"></i> Attach to Asset
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Upload this file and link it to an existing asset in the registry.</div>
+        <select class="form-control" id="xl-attach-asset" style="margin-bottom:10px;font-size:12px">
+          <option value="">Loading…</option>
+        </select>
+        <button class="btn btn-primary" style="width:100%" id="xl-attach-btn" onclick="_doAttachToAsset()">
+          <i class="fa-solid fa-paperclip"></i> Upload &amp; Attach
+        </button>
+      </div>
+
+      <!-- Option B — Save to File DB without asset -->
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">
+          <i class="fa-solid fa-folder"></i> Save Without Asset
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Save the file to the database without linking it to a specific asset.</div>
+        <button class="btn btn-secondary" style="width:100%" id="xl-saveloose-btn" onclick="_doSaveLoose()">
+          <i class="fa-solid fa-floppy-disk"></i> Save to File DB
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('xl-results-card').style.display='none'">
+        <i class="fa-solid fa-xmark"></i> Dismiss
+      </button>
+    </div>`;
+
+  _loadAssetsForAttach(document.getElementById('xl-attach-asset'));
+  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+async function _doAttachToAsset() {
+  const assetId = document.getElementById('xl-attach-asset')?.value;
+  if (!assetId) { toast('Select an asset first','fa-triangle-exclamation',true); return; }
+
+  const btn = document.getElementById('xl-attach-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></div> Uploading…';
+
+  try {
+    await apiUploadExcel(assetId, _xlFile);
+    toast('File uploaded and attached to ' + assetId, 'fa-circle-check');
+    addAudit('EXCEL_ATTACHED', assetId, null, _xlFile.name + ' attached');
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Attached to ' + assetId;
+  } catch(e) {
+    toast('Upload failed: ' + (e.message||'error'), 'fa-circle-xmark', true);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-paperclip"></i> Upload & Attach';
+  }
+}
+
+async function _doSaveLoose() {
+  const btn = document.getElementById('xl-saveloose-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px"></div> Saving…';
+
+  // Use a sentinel asset ID for unassigned files — backend stores it but it's browseable in File DB
+  // Falls back to a clear error message if backend rejects the sentinel
+  const sentinelId = '_unassigned';
+  try {
+    await apiUploadExcel(sentinelId, _xlFile);
+    toast('File saved to database', 'fa-circle-check');
+    addAudit('EXCEL_UPLOADED', 'UNASSIGNED', null, _xlFile.name + ' saved loose');
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Saved';
+    // Add a link to file db
+    btn.insertAdjacentHTML('afterend',
+      '<a href="filedb.html" class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px"><i class="fa-solid fa-folder-open"></i> View in File DB</a>');
+  } catch(e) {
+    // Backend rejected sentinel — inform user to attach to an asset instead
+    toast('Backend requires an asset — please use "Attach to Asset" instead', 'fa-triangle-exclamation', true);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save to File DB';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  const dz = document.getElementById('xl-drop');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');xlLoad(e.dataTransfer.files[0]);});
+});
+</script>
+</body>
+</html>

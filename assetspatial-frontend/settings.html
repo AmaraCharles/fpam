@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Settings — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item active" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#fff">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">SETTINGS</div><div class="breadcrumb">AssetSpatial / Platform Settings</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+      <button class="btn btn-primary btn-sm" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+  </header>
+  <div id="content" style="max-width:800px">
+    <!-- GENERAL -->
+    <div class="surface-card" style="margin-bottom:18px">
+      <div class="card-header"><div class="card-title"><i class="fa-solid fa-gear" style="color:var(--accent)"></i> General</div></div>
+      <div style="padding:0">
+        <div class="settings-row">
+          <div><div class="settings-label">Platform Name</div><div class="settings-sub">Displayed in header and exports</div></div>
+          <input class="filter-input" style="width:220px" id="s-name" value="AssetSpatial Platform">
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Organisation</div><div class="settings-sub">Your organisation name</div></div>
+          <input class="filter-input" style="width:220px" id="s-org" value="Federal Government of Nigeria">
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Coordinate System</div></div>
+          <select class="filter-input" style="width:220px" id="s-coord">
+            <option value="WGS84" selected>WGS84</option>
+            <option value="UTM Zone 32N">UTM Zone 32N</option>
+            <option value="Local Projection">Local Projection</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Default Map Center</div><div class="settings-sub">Latitude, Longitude (Abuja default)</div></div>
+          <div style="display:flex;gap:8px">
+            <input class="filter-input" style="width:100px" id="s-lat" value="9.0765" placeholder="Lat">
+            <input class="filter-input" style="width:100px" id="s-lng" value="7.3986" placeholder="Lng">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="surface-card" style="margin-bottom:18px">
+      <div class="card-header"><div class="card-title"><i class="fa-solid fa-toggle-on" style="color:var(--accent)"></i> Feature Toggles</div></div>
+      <div style="padding:0">
+        <div class="settings-row"><div><div class="settings-label">OCR Scanning</div><div class="settings-sub">Allow document OCR extraction</div></div><div class="toggle on" id="t-ocr" onclick="this.classList.toggle('on')"></div></div>
+        <div class="settings-row"><div><div class="settings-label">Excel Import</div><div class="settings-sub">Allow Excel dataset uploads</div></div><div class="toggle on" id="t-excel" onclick="this.classList.toggle('on')"></div></div>
+        <div class="settings-row"><div><div class="settings-label">Realtime Updates</div><div class="settings-sub">Live dashboard via WebSocket</div></div><div class="toggle on" id="t-rt" onclick="this.classList.toggle('on')"></div></div>
+        <div class="settings-row"><div><div class="settings-label">Offline Mode</div><div class="settings-sub">Allow field capture without internet</div></div><div class="toggle" id="t-offline" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+    
+ 
+<!-- MDA MANAGEMENT -->
+<div class="surface-card" style="margin-bottom:18px" id="mda-management-card">
+  <div class="card-header">
+    <div class="card-title"><i class="fa-solid fa-building-columns" style="color:var(--accent)"></i> MDA Management</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="openMdaCsvModal()">
+        <i class="fa-solid fa-file-csv"></i> Import CSV
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openAddMdaModal()">
+        <i class="fa-solid fa-plus"></i> Add MDA
+      </button>
+    </div>
+  </div>
+ 
+  <!-- Stats bar -->
+  <div style="display:flex;gap:16px;padding:12px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+    <div style="font-size:12px;color:var(--text3)">
+      Total: <strong id="mda-total" style="color:var(--text)">—</strong>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">
+      Ministries: <strong id="mda-count-ministry" style="color:var(--text)">—</strong>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">
+      Agencies: <strong id="mda-count-agency" style="color:var(--text)">—</strong>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">
+      Commissions: <strong id="mda-count-commission" style="color:var(--text)">—</strong>
+    </div>
+  </div>
+ 
+  <!-- Search -->
+  <div style="padding:10px 18px;border-bottom:1px solid var(--border)">
+    <div style="position:relative">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px"></i>
+      <input class="filter-input" type="text" id="mda-search" placeholder="Search MDAs…"
+             oninput="filterMdaList()" style="padding-left:32px;width:100%;box-sizing:border-box">
+    </div>
+  </div>
+ 
+  <!-- MDA list -->
+  <div id="mda-list" style="max-height:420px;overflow-y:auto;padding:0">
+    <div style="text-align:center;padding:32px;color:var(--text3)">
+      <i class="fa-solid fa-spinner fa-spin"></i> Loading MDAs…
+    </div>
+  </div>
+</div>
+ 
+<!--
+  ════════════════════════════════════════════════════════════════
+  PATCH — settings.html  <script> block (add to existing script)
+  ════════════════════════════════════════════════════════════════
+  Add the following JS inside or just after the existing <script> block.
+-->
+<script>
+// ── MDA Management ────────────────────────────────────────────────────────────
+let _allMdas = [];
+ 
+async function loadMdaList() {
+  try {
+    // Fetch all — including inactive — by not sending active filter from admin view
+    // We use the public endpoint; inactive ones are hidden there, so admins can
+    // re-activate via a future toggle. For now show active list.
+    const r = await apiGetMdas();
+    _allMdas = r.mdas || [];
+    renderMdaList(_allMdas);
+    updateMdaStats(_allMdas);
+  } catch (e) {
+    document.getElementById('mda-list').innerHTML =
+      `<div style="padding:20px;color:var(--danger);font-size:13px"><i class="fa-solid fa-circle-xmark"></i> Failed to load MDAs: ${e.message}</div>`;
+  }
+}
+ 
+function updateMdaStats(list) {
+  document.getElementById('mda-total').textContent          = list.length;
+  document.getElementById('mda-count-ministry').textContent = list.filter(m => m.category === 'Ministry').length;
+  document.getElementById('mda-count-agency').textContent   = list.filter(m => m.category === 'Agency').length;
+  document.getElementById('mda-count-commission').textContent = list.filter(m => m.category === 'Commission').length;
+}
+ 
+function filterMdaList() {
+  const q = document.getElementById('mda-search')?.value.trim().toLowerCase() || '';
+  renderMdaList(q ? _allMdas.filter(m => m.name.toLowerCase().includes(q) || (m.shortName||'').toLowerCase().includes(q)) : _allMdas);
+}
+ 
+const MDA_CAT_COLOR = {
+  Ministry:   'tag-blue',
+  Agency:     'tag-green',
+  Commission: 'tag-orange',
+  Department: 'tag-warn',
+  Other:      'tag-gray',
+};
+ 
+function renderMdaList(list) {
+  const el = document.getElementById('mda-list');
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text3)">
+      <i class="fa-solid fa-building-columns" style="font-size:24px;margin-bottom:8px;display:block"></i>
+      No MDAs found. Add one or import from CSV.
+    </div>`;
+    return;
+  }
+  el.innerHTML = list.map(m => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);transition:background .1s" onmouseenter="this.style.background='var(--surface2)'" onmouseleave="this.style.background=''">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(m.name)}</div>
+        ${m.shortName ? `<div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace">${escHtml(m.shortName)}</div>` : ''}
+      </div>
+      <span class="tag ${MDA_CAT_COLOR[m.category]||'tag-gray'}" style="font-size:9px;flex-shrink:0">${escHtml(m.category||'Ministry').toUpperCase()}</span>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-ghost btn-xs" onclick='openEditMdaModal(${JSON.stringify(m).replace(/'/g,"&#39;")})' title="Edit">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button class="btn btn-danger btn-xs" onclick="deleteMda('${m._id}')" title="Remove">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+ 
+function openAddMdaModal() {
+  openModal('Add MDA',
+    `<div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label required">Full Name</label>
+        <input class="form-control" id="mda-name-input" placeholder="e.g. Federal Ministry of Works and Housing">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Name / Acronym</label>
+        <input class="form-control" id="mda-short-input" placeholder="e.g. FMWH">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" id="mda-cat-input">
+          <option value="Ministry">Ministry</option>
+          <option value="Agency">Agency</option>
+          <option value="Commission">Commission</option>
+          <option value="Department">Department</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="doAddMda()"><i class="fa-solid fa-plus"></i> Add MDA</button>`
+  );
+  setTimeout(() => document.getElementById('mda-name-input')?.focus(), 100);
+}
+ 
+async function doAddMda() {
+  const name      = document.getElementById('mda-name-input')?.value.trim();
+  const shortName = document.getElementById('mda-short-input')?.value.trim();
+  const category  = document.getElementById('mda-cat-input')?.value;
+  if (!name) { toast('MDA name is required', 'fa-triangle-exclamation', true); return; }
+  try {
+    await apiCreateMda({ name, shortName, category });
+    toast('MDA added successfully');
+    closeModal();
+    _mdaCache = null; // invalidate dropdown cache
+    await loadMdaList();
+  } catch (e) {
+    toast(e.message || 'Failed to add MDA', 'fa-circle-xmark', true);
+  }
+}
+ 
+function openEditMdaModal(m) {
+  openModal('Edit MDA',
+    `<div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label required">Full Name</label>
+        <input class="form-control" id="mda-edit-name" value="${escHtml(m.name)}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Name / Acronym</label>
+        <input class="form-control" id="mda-edit-short" value="${escHtml(m.shortName||'')}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" id="mda-edit-cat">
+          ${['Ministry','Agency','Commission','Department','Other'].map(c =>
+            `<option ${m.category===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="doEditMda('${m._id}')"><i class="fa-solid fa-floppy-disk"></i> Save</button>`
+  );
+}
+ 
+async function doEditMda(id) {
+  const name      = document.getElementById('mda-edit-name')?.value.trim();
+  const shortName = document.getElementById('mda-edit-short')?.value.trim();
+  const category  = document.getElementById('mda-edit-cat')?.value;
+  if (!name) { toast('MDA name is required', 'fa-triangle-exclamation', true); return; }
+  try {
+    await apiUpdateMda(id, { name, shortName, category });
+    toast('MDA updated');
+    closeModal();
+    _mdaCache = null;
+    await loadMdaList();
+  } catch (e) {
+    toast(e.message || 'Update failed', 'fa-circle-xmark', true);
+  }
+}
+ 
+async function deleteMda(id) {
+  if (!confirm('Remove this MDA? Assets that reference it will retain the name but it will no longer appear in the dropdown.')) return;
+  try {
+    await apiDeleteMda(id);
+    toast('MDA removed');
+    _mdaCache = null;
+    await loadMdaList();
+  } catch (e) {
+    toast(e.message || 'Delete failed', 'fa-circle-xmark', true);
+  }
+}
+ 
+function openMdaCsvModal() {
+  openModal('Import MDAs from CSV',
+    `<div style="margin-bottom:12px;font-size:12px;color:var(--text2)">
+      Paste CSV text below, or describe one MDA per line.<br>
+      Accepted formats:<br>
+      <code style="font-size:11px;color:var(--accent)">Full Name, ShortName, Category</code><br>
+      <code style="font-size:11px;color:var(--accent)">Full Name</code> (one per line, no header needed)
+    </div>
+    <textarea class="form-control" id="mda-csv-input" rows="10"
+      placeholder="Federal Ministry of Works and Housing, FMWH, Ministry&#10;Economic and Financial Crimes Commission, EFCC, Commission&#10;..."></textarea>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3)">
+      Duplicates are automatically skipped. Existing MDAs are not overwritten.
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="doImportMdaCsv()"><i class="fa-solid fa-file-import"></i> Import</button>`
+  );
+}
+ 
+async function doImportMdaCsv() {
+  const csv = document.getElementById('mda-csv-input')?.value.trim();
+  if (!csv) { toast('Paste CSV content first', 'fa-triangle-exclamation', true); return; }
+  try {
+    const r = await apiImportMdasCsv(csv);
+    toast(`Imported ${r.created} MDAs${r.skipped ? ` (${r.skipped} duplicates skipped)` : ''}`);
+    closeModal();
+    _mdaCache = null;
+    await loadMdaList();
+  } catch (e) {
+    toast(e.message || 'Import failed', 'fa-circle-xmark', true);
+  }
+}
+ 
+// ── Kick off MDA load when settings page opens ────────────────────────────────
+// Add this line at the END of your existing DOMContentLoaded handler:
+//   loadMdaList();
+// i.e., after the existing settings load try/catch block.
+</script>
+
+    <!-- EXPORT -->
+    <div class="surface-card" style="margin-bottom:18px">
+      <div class="card-header"><div class="card-title"><i class="fa-solid fa-download" style="color:var(--accent)"></i> Export Settings</div></div>
+      <div style="padding:14px 18px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Allowed export formats:</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"> CSV</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"> JSON</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"> GeoJSON</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"> XLSX</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="surface-card" style="margin-bottom:18px">
+      <div class="card-header"><div class="card-title"><i class="fa-solid fa-user-shield" style="color:var(--accent)"></i> My Account</div></div>
+      <div style="padding:0">
+        <div class="settings-row">
+          <div><div class="settings-label">Display Theme</div><div class="settings-sub">Switch between dark and light mode</div></div>
+          <button class="btn btn-secondary btn-sm" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i> Toggle Theme</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Sign Out</div><div class="settings-sub">End your current session</div></div>
+          <button class="btn btn-danger btn-sm" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM INFO -->
+    <div class="surface-card">
+      <div class="card-header"><div class="card-title"><i class="fa-solid fa-circle-info" style="color:var(--accent)"></i> System Information</div></div>
+      <div style="padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Version</span> v1.0.0</div>
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">API Status</span> <span id="api-status-label">Checking…</span></div>
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Backend</span> Node.js / Express</div>
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Database</span> MongoDB 7</div>
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">File Storage</span> GridFS</div>
+        <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">OCR Engine</span> Tesseract (eng+yor+hau)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);gap:20px;font-size:13px;}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{font-size:13px;color:var(--text);}
+.settings-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.toggle{position:relative;width:42px;height:24px;background:var(--border2);border-radius:12px;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:21px;}
+</style>
+
+
+<!-- MODAL (required by openModal in app.js) -->
+<div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" style="width:580px;max-width:95vw">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body"><div id="modal-body-inner"></div></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+
+async function saveSettings() {
+  const data = {
+    platformName: document.getElementById('s-name').value,
+    organisation: document.getElementById('s-org').value,
+    coordinateSystem: document.getElementById('s-coord').value,
+    defaultMapCenter: { lat: parseFloat(document.getElementById('s-lat').value)||9.0765, lng: parseFloat(document.getElementById('s-lng').value)||7.3986 },
+    featureToggles: {
+      ocrEnabled:      document.getElementById('t-ocr').classList.contains('on'),
+      excelEnabled:    document.getElementById('t-excel').classList.contains('on'),
+      realtimeEnabled: document.getElementById('t-rt').classList.contains('on'),
+      offlineMode:     document.getElementById('t-offline').classList.contains('on'),
+    }
+  };
+  try {
+    await apiUpdateSettings(data);
+    toast('Settings saved successfully');
+  } catch(e) {
+    // fallback: save locally
+    Object.assign(settings, data); saveLocal();
+    toast('Saved locally (API offline)');
+  }
+  // Update sidebar logo-mark and header title with new platform name
+  const newName = data.platformName;
+  if (newName) {
+    // Sidebar
+    document.querySelectorAll('.logo-mark').forEach(el => el.textContent = newName);
+    // Header breadcrumb (first segment)
+    document.querySelectorAll('.breadcrumb').forEach(el => {
+      el.textContent = el.textContent.replace(/^[^/]+/, newName);
+    });
+    // Store for other pages to pick up
+    localStorage.setItem('as_platform_name', newName);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+
+  // Load MDA list
+  loadMdaList();
+
+  // Load settings from API
+  try {
+    const { settings: s } = await apiGetSettings();
+    if (s.platformName) document.getElementById('s-name').value = s.platformName;
+    if (s.organisation) document.getElementById('s-org').value = s.organisation;
+    if (s.coordinateSystem) document.getElementById('s-coord').value = s.coordinateSystem;
+    if (s.defaultMapCenter) { document.getElementById('s-lat').value=s.defaultMapCenter.lat; document.getElementById('s-lng').value=s.defaultMapCenter.lng; }
+    if (s.featureToggles) {
+      if (!s.featureToggles.ocrEnabled)      document.getElementById('t-ocr').classList.remove('on');
+      if (!s.featureToggles.excelEnabled)    document.getElementById('t-excel').classList.remove('on');
+      if (!s.featureToggles.realtimeEnabled) document.getElementById('t-rt').classList.remove('on');
+      if (s.featureToggles.offlineMode)      document.getElementById('t-offline').classList.add('on');
+    }
+    document.getElementById('api-status-label').innerHTML='<span style="color:var(--accent)"><i class="fa-solid fa-circle" style="font-size:8px"></i> Online</span>';
+  } catch {
+    document.getElementById('api-status-label').innerHTML='<span style="color:var(--text3)"><i class="fa-solid fa-circle" style="font-size:8px"></i> Offline</span>';
+  }
+});
+</script>
+</body>
+</html>

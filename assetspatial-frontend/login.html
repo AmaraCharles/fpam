@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sign In — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --bg:#0a0f0d;--surface:#111a15;--surface2:#172011;--border:#1f3020;--border2:#2a4230;
+  --accent:#00c864;--accent2:#00ffab;--text:#edf5f0;--text2:#8aab96;--text3:#4d7a5e;
+  --danger:#e05555;--warn:#f0b400;
+  --ff-head:'Syne',sans-serif;--ff-body:'Space Grotesk',sans-serif;--ff-mono:'Space Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--ff-body);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ── SPLIT LAYOUT ── */
+.login-page{display:flex;width:100%;min-height:100vh;}
+
+/* LEFT PANEL */
+.login-panel{
+  width:460px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:40px 48px;
+}
+
+.lp-logo{display:flex;align-items:center;gap:12px;margin-bottom:56px;}
+.lp-logo-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#00a855);
+  display:flex;align-items:center;justify-content:center;color:#000;font-size:18px;
+}
+.lp-logo-mark{font-family:var(--ff-head);font-size:20px;font-weight:800;letter-spacing:.5px;}
+.lp-logo-sub{font-family:var(--ff-mono);font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+
+.lp-heading{font-family:var(--ff-head);font-size:30px;font-weight:800;margin-bottom:6px;}
+.lp-sub{font-size:13px;color:var(--text2);margin-bottom:36px;line-height:1.5;}
+
+.form-grp{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;}
+.form-lbl{font-family:var(--ff-mono);font-size:9px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;}
+.input-wrap{position:relative;}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;}
+.form-ctrl{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:11px 14px 11px 40px;color:var(--text);font-size:13.5px;font-family:var(--ff-body);
+  outline:none;transition:border-color .15s,background .15s;
+}
+.form-ctrl:focus{border-color:var(--accent);background:rgba(0,200,100,0.04);}
+.form-ctrl::placeholder{color:var(--text3);}
+.show-pw{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;
+  padding:4px;transition:color .15s;
+}
+.show-pw:hover{color:var(--text2);}
+
+.form-err{font-size:11px;color:var(--danger);margin-top:4px;display:none;align-items:center;gap:5px;}
+.form-err.show{display:flex;}
+
+.forgot-row{text-align:right;margin-top:-10px;margin-bottom:20px;}
+.forgot-row a{font-size:12px;color:var(--text3);text-decoration:none;transition:color .15s;}
+.forgot-row a:hover{color:var(--accent);}
+
+.btn-login{
+  width:100%;padding:13px;background:var(--accent);color:#000;border:none;
+  border-radius:8px;font-size:14px;font-weight:700;font-family:var(--ff-body);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .15s,box-shadow .15s;
+}
+.btn-login:hover{background:var(--accent2);box-shadow:0 0 20px rgba(0,200,100,0.35);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+
+.alert{padding:11px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;display:none;align-items:center;gap:10px;}
+.alert.show{display:flex;}
+.alert-err{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.3);color:var(--danger);}
+.alert-info{background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.2);color:var(--accent);}
+
+.divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--text3);font-size:11px;font-family:var(--ff-mono);}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.lp-footer{margin-top:auto;padding-top:32px;font-size:11px;color:var(--text3);font-family:var(--ff-mono);letter-spacing:.3px;}
+.lp-footer a{color:var(--accent);text-decoration:none;}
+.lp-footer a:hover{text-decoration:underline;}
+
+/* RIGHT VISUAL PANEL */
+.login-visual{
+  flex:1;background:var(--bg);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;
+}
+.vis-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.4;
+}
+.vis-glow{
+  position:absolute;width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,200,100,.1) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+}
+.vis-content{position:relative;z-index:1;text-align:center;}
+.vis-badge{
+  width:88px;height:88px;border-radius:22px;margin:0 auto 28px;
+  background:linear-gradient(135deg,var(--accent),#009944);
+  display:flex;align-items:center;justify-content:center;color:#000;font-size:38px;
+  box-shadow:0 24px 64px rgba(0,200,100,.35);
+}
+.vis-title{font-family:var(--ff-head);font-size:48px;font-weight:800;letter-spacing:2px;color:var(--text);margin-bottom:12px;}
+.vis-sub{font-size:14px;color:var(--text3);max-width:340px;margin:0 auto 40px;line-height:1.65;}
+.vis-pills{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.vis-pill{
+  background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:40px;padding:10px 20px;text-align:center;
+  transition:border-color .2s;
+}
+.vis-pill:hover{border-color:var(--accent);}
+.vis-pill-val{font-family:var(--ff-head);font-size:24px;font-weight:700;color:var(--accent);}
+.vis-pill-lbl{font-family:var(--ff-mono);font-size:8.5px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
+.vis-flag{
+  position:absolute;bottom:28px;right:28px;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:8px 16px;
+}
+.vis-flag-text{font-family:var(--ff-mono);font-size:9px;color:var(--text3);letter-spacing:.5px;line-height:1.4;}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:768px){.login-visual{display:none;}.login-panel{width:100%;border-right:none;padding:28px 24px;}}
+</style>
+</head>
+<body>
+<div class="login-page">
+
+  <!-- ── LEFT: FORM ── -->
+  <div class="login-panel">
+    <div class="lp-logo">
+      <div class="lp-logo-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+      <div>
+        <div class="lp-logo-mark">AssetSpatial</div>
+        <div class="lp-logo-sub">Federal Asset Registry</div>
+      </div>
+    </div>
+
+    <div class="lp-heading">Welcome back</div>
+    <div class="lp-sub">Sign in to your account to access the federal asset management platform.</div>
+
+    <!-- ALERT -->
+    <div class="alert alert-err" id="login-alert">
+      <i class="fa-solid fa-circle-xmark"></i>
+      <span id="login-alert-msg">Invalid credentials. Please try again.</span>
+    </div>
+    <div class="alert alert-info" id="demo-hint" style="display:flex">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Demo: <strong>admin@assetspatial.gov.ng</strong> / <strong>ChangeMe123!</strong></span>
+    </div>
+
+    <div class="form-grp">
+      <label class="form-lbl" for="email">Email Address</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-envelope input-icon"></i>
+        <input class="form-ctrl" type="email" id="email" placeholder="you@agency.gov.ng" autocomplete="email">
+      </div>
+      <div class="form-err" id="err-email"><i class="fa-solid fa-circle-exclamation" style="font-size:11px"></i> Please enter a valid email address</div>
+    </div>
+
+    <div class="form-grp">
+      <label class="form-lbl" for="password">Password</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-lock input-icon"></i>
+        <input class="form-ctrl" type="password" id="password" placeholder="Your password" autocomplete="current-password">
+        <button class="show-pw" type="button" onclick="togglePw()" id="pw-toggle" title="Show/hide password">
+          <i class="fa-solid fa-eye" id="pw-eye"></i>
+        </button>
+      </div>
+      <div class="form-err" id="err-pass"><i class="fa-solid fa-circle-exclamation" style="font-size:11px"></i> Password is required</div>
+    </div>
+
+    <div class="forgot-row"><a href="#">Forgot password?</a></div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">
+      <i class="fa-solid fa-right-to-bracket" id="btn-icon"></i>
+      <span id="btn-label">Sign In</span>
+    </button>
+
+    <div class="divider">or</div>
+
+    <div style="text-align:center;font-size:13px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+      <i class="fa-solid fa-user-plus" style="color:var(--accent);margin-right:6px"></i>
+      New account? Contact your <strong style="color:var(--text)">System Administrator</strong> to get access.
+      <br><a href="register.html" style="color:var(--accent);font-size:12px;margin-top:6px;display:inline-block">Request access →</a>
+    </div>
+
+    <div class="lp-footer">
+      AssetSpatial Platform &copy; 2026 &nbsp;·&nbsp; Federal Republic of Nigeria<br>
+      <a href="#">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="#">Support</a>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: VISUAL ── -->
+  <div class="login-visual">
+    <div class="vis-grid"></div>
+    <div class="vis-glow"></div>
+    <div class="vis-content">
+      <div class="vis-badge"><i class="fa-solid fa-map-location-dot"></i></div>
+      <div class="vis-title">ASSET<br>SPATIAL</div>
+      <div class="vis-sub">Federal Public Asset Management — tracking infrastructure, land, utilities and environmental assets across all 36 states and the FCT.</div>
+      <div class="vis-pills">
+        <div class="vis-pill"><div class="vis-pill-val">36+</div><div class="vis-pill-lbl">States</div></div>
+        <div class="vis-pill"><div class="vis-pill-val">GIS</div><div class="vis-pill-lbl">Spatial Ready</div></div>
+        <div class="vis-pill"><div class="vis-pill-val">4</div><div class="vis-pill-lbl">Roles</div></div>
+        <div class="vis-pill"><div class="vis-pill-val">OCR</div><div class="vis-pill-lbl">AI-Powered</div></div>
+      </div>
+    </div>
+    <div class="vis-flag">
+      <span style="font-size:22px">🇳🇬</span>
+      <div class="vis-flag-text">Federal Republic of Nigeria<br>Secure Government Platform</div>
+    </div>
+  </div>
+</div>
+
+
+<script src="js/api.js"></script>
+<script>
+// Redirect if already logged in
+if (localStorage.getItem('as_token')) window.location.href = 'dashboard.html';
+
+function togglePw() {
+  const inp = document.getElementById('password');
+  const eye = document.getElementById('pw-eye');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  eye.className = inp.type==='text' ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+}
+
+document.getElementById('email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn      = document.getElementById('login-btn');
+
+  // Clear errors
+  document.getElementById('err-email').classList.remove('show');
+  document.getElementById('err-pass').classList.remove('show');
+  document.getElementById('login-alert').classList.remove('show');
+  document.getElementById('demo-hint').style.display='none';
+
+  let valid = true;
+  if (!email || !email.includes('@')) { document.getElementById('err-email').classList.add('show'); valid=false; }
+  if (!password) { document.getElementById('err-pass').classList.add('show'); valid=false; }
+  if (!valid) return;
+
+  btn.disabled=true;
+  document.getElementById('btn-icon').className='fa-solid fa-spinner fa-spin';
+  document.getElementById('btn-label').textContent='Signing in…';
+
+  try {
+    const data = await apiLogin(email, password);
+    // apiLogin handles token storage
+    window.location.href = 'dashboard.html';
+  } catch(e) {
+    document.getElementById('login-alert-msg').textContent = e.message || 'Login failed. Check your credentials.';
+    document.getElementById('login-alert').classList.add('show');
+    btn.disabled=false;
+    document.getElementById('btn-icon').className='fa-solid fa-right-to-bracket';
+    document.getElementById('btn-label').textContent='Sign In';
+  }
+}
+</script>
+</body>
+</html>

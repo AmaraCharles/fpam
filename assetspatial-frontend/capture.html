@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Field Capture — AssetSpatial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:    #0B2545;
+  --blue:    #4A90D9;
+  --blue-lt: #6AAEE8;
+  --blue-bg: rgba(74,144,217,.08);
+  --blue-bd: rgba(74,144,217,.18);
+  --white:   #ffffff;
+  --bg:      #F4F6F9;
+  --card:    #ffffff;
+  --border:  #E8ECF0;
+  --text:    #0B1829;
+  --text2:   #2C3E50;
+  --text3:   #5A6A7A;
+  --danger:  #e05555;
+  --warn:    #f0a500;
+  --success: #2DB87B;
+  --sidebar-w: 250px;
+  --font:    'DM Sans', sans-serif;
+  --radius:  10px;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text);
+       display: flex; height: 100vh; overflow: hidden; font-size: 14px; line-height: 1.5; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d8e4; border-radius: 10px; }
+
+/* ══ SIDEBAR ══ */
+#sidebar { width: var(--sidebar-w); background: var(--navy); color: #fff;
+           display: flex; flex-direction: column; flex-shrink: 0; z-index: 40; transition: transform 0.3s; }
+.logo { padding: 22px 20px 18px; border-bottom: 1px solid rgba(255,255,255,.08);
+        display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue);
+             display: flex; align-items: center; justify-content: center; }
+.logo-icon i { color: #fff; font-size: 17px; }
+.logo-mark { font-size: 17px; font-weight: 800; color: #fff; line-height: 1.1; }
+.logo-sub  { font-size: 9px; color: rgba(255,255,255,.45); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 0; }
+.nav-section { font-size: 9px; color: rgba(255,255,255,.35); letter-spacing: 2px;
+               text-transform: uppercase; padding: 14px 20px 5px; font-weight: 600; }
+.nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 20px;
+            color: rgba(255,255,255,.62); font-size: 13.5px; font-weight: 500;
+            border-left: 3px solid transparent; transition: all .15s; text-decoration: none; }
+.nav-item i { width: 18px; font-size: 13px; text-align: center; flex-shrink: 0; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.06); }
+.nav-item.active { color: #fff; background: var(--blue-bd); border-left-color: var(--blue); }
+.sidebar-bottom { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+.user-card-sb { display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+                border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+.user-av { width: 34px; height: 34px; border-radius: 50%; background: var(--blue);
+           display: flex; align-items: center; justify-content: center;
+           font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-nm { font-size: 13px; font-weight: 600; color: #fff; }
+.user-rl { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 1px; }
+.icon-btn { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,.08);
+            border: none; color: rgba(255,255,255,.55); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; }
+.icon-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+/* ══ MAIN ══ */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+#header { background: var(--white); border-bottom: 1px solid var(--border);
+          padding: 0 28px; height: 68px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.menu-toggle-btn { display: none; background: none; border: none; color: var(--text2);
+                   font-size: 18px; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+.page-title { font-size: 20px; font-weight: 800; color: var(--text); }
+.breadcrumb { font-size: 12px; color: var(--text3); margin-top: 1px; font-weight: 500; }
+.conn-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); margin-left: auto; }
+.conn-dot    { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); transition: background .3s; }
+.conn-dot.live { background: var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+#content { flex: 1; overflow-y: auto; padding: 24px 28px; background: var(--bg); }
+
+/* ── CARD ── */
+.wcard { background: var(--card); border-radius: 12px; border: 1px solid var(--border);
+         box-shadow: 0 1px 4px rgba(0,0,0,.05); overflow: hidden; }
+.wcard-hd { padding: 16px 20px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; }
+.wcard-title { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.wcard-title i { color: var(--blue); font-size: 14px; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group.third { grid-column: span 1; }
+.form-label {
+  font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 5px;
+}
+.form-label .req { color: var(--danger); font-size: 13px; line-height: 1; }
+.form-control {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 13px; font-family: var(--font); font-size: 13px; color: var(--text);
+  outline: none; transition: border .15s; width: 100%;
+}
+.form-control:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(74,144,217,.12); }
+.form-control::placeholder { color: var(--text3); }
+.form-control[readonly] { color: var(--text3); cursor: not-allowed; background: #f0f3f7; }
+select.form-control { cursor: pointer; }
+textarea.form-control { resize: vertical; }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+/* Section divider inside form */
+.form-section-divider {
+  grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 16px;
+  margin-top: 4px; display: flex; align-items: center; gap: 10px;
+}
+.form-section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--blue); white-space: nowrap;
+}
+
+/* ── GPS BLOCK ── */
+.gps-block {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--blue-bg); border: 1px solid var(--blue-bd);
+  border-radius: 8px; padding: 12px 16px;
+}
+.gps-coords { flex: 1; font-family: 'Courier New', monospace; font-size: 12px; color: var(--blue); font-weight: 600; }
+.gps-accuracy { font-size: 10px; color: var(--text3); font-family: 'Courier New', monospace; }
+
+/* ── ASSESSMENT TOGGLE ── */
+.assess-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.assess-btn {
+  flex: 1; padding: 9px 14px; font-family: var(--font); font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; transition: all .15s; background: var(--bg); color: var(--text3);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.assess-btn:first-child { border-right: 1px solid var(--border); }
+.assess-btn.active-assessed { background: rgba(45,184,123,.12); color: #0f7a4d; }
+.assess-btn.active-unassessed { background: rgba(240,165,0,.12); color: #8a5e00; }
+
+/* ── PHOTO DROP ZONE ── */
+.photo-drop {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 28px;
+  text-align: center; cursor: pointer; transition: all .15s; background: var(--bg);
+}
+.photo-drop:hover, .photo-drop.over { border-color: var(--blue); background: var(--blue-bg); }
+.photo-drop i { font-size: 24px; color: var(--text3); margin-bottom: 8px; display: block; }
+.photo-drop p { font-size: 13px; color: var(--text2); font-weight: 500; }
+.photo-drop span { font-size: 11px; color: var(--text3); }
+
+/* ── PHOTO PREVIEW ── */
+#photo-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.photo-thumb-wrap { position: relative; width: 90px; height: 90px; border-radius: 8px;
+                    overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
+.photo-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-thumb-del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.65);
+                   color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px;
+                   cursor: pointer; display: flex; align-items: center; justify-content: center;
+                   font-size: 9px; opacity: 0; transition: opacity .15s; }
+.photo-thumb-wrap:hover .photo-thumb-del { opacity: 1; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
+       border-radius: 8px; font-family: var(--font); font-size: 13px; font-weight: 600;
+       cursor: pointer; border: none; transition: all .15s; text-decoration: none; white-space: nowrap; }
+.btn i { font-size: 12px; }
+.btn-primary   { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-lt); box-shadow: 0 4px 16px rgba(74,144,217,.35); }
+.btn-secondary { background: var(--white); color: var(--text2); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
+.btn-ghost     { background: none; border: 1px solid var(--border); color: var(--text2); }
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-success   { background: rgba(45,184,123,.15); color: #0f7a4d; border: 1px solid rgba(45,184,123,.3); }
+.btn-sm  { padding: 6px 14px; font-size: 12px; }
+.btn-gps {
+  background: var(--blue-bg); border: 1px solid var(--blue-bd); color: var(--blue);
+  padding: 7px 14px; font-size: 12px;
+}
+.btn-gps:hover { background: var(--blue-bd); }
+
+/* ── RIGHT PANEL ── */
+.right-panel { display: flex; flex-direction: column; gap: 16px; }
+#preview-map { height: 200px; }
+.coords-label { padding: 8px 16px; font-family: 'Courier New', monospace;
+                font-size: 10px; color: var(--text3); border-top: 1px solid var(--border); }
+.recent-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.recent-table th { padding: 9px 14px; text-align: left; font-size: 10px; font-weight: 700;
+                   color: var(--text2); border-bottom: 1px solid var(--border);
+                   background: var(--bg); text-transform: uppercase; letter-spacing: .5px; }
+.recent-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+.recent-table tbody tr:last-child td { border-bottom: none; }
+.recent-table tbody tr:hover { background: var(--blue-bg); cursor: pointer; }
+
+/* ── TAGS ── */
+.tag { display: inline-flex; align-items: center; padding: 2px 9px;
+       border-radius: 6px; font-size: 11px; font-weight: 700; }
+.tag-green  { background: rgba(45,184,123,.15);  color: #0f7a4d; }
+.tag-blue   { background: rgba(74,144,217,.15);  color: #0d5291; }
+.tag-red    { background: rgba(224,85,85,.15);   color: #a02020; }
+.tag-orange { background: rgba(240,165,0,.15);   color: #8a5e00; }
+.tag-gray   { background: rgba(90,106,122,.12);  color: #2C3E50; }
+.tag-teal   { background: rgba(0,180,140,.12);   color: #007a60; }
+.tag-purple { background: rgba(160,80,240,.12);  color: #7030c0; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: #fff;
+         padding: 12px 18px; border-radius: 10px; font-size: 13px;
+         display: flex; align-items: center; gap: 8px;
+         box-shadow: 0 8px 32px rgba(0,0,0,.2); z-index: 999;
+         transform: translateY(80px); opacity: 0; transition: all .3s; }
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast i { color: var(--success); }
+
+/* Sidebar overlay */
+#sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 39; }
+#sidebar-overlay.open { display: block; }
+
+@media (max-width: 1100px) {
+  .capture-grid { grid-template-columns: 1fr !important; }
+  .right-panel { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  #sidebar { position: fixed; top:0; left:0; bottom:0; transform: translateX(-100%); z-index: 200; }
+  #sidebar.open { transform: translateX(0); }
+  .menu-toggle-btn { display: flex; align-items: center; }
+  .right-panel { display: flex; }
+}
+@media (max-width: 600px) {
+  #content { padding: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+    <div>
+      <div class="logo-mark">AssetSpatial</div>
+      <div class="logo-sub">Federal Registry</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item active" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card-sb">
+      <div class="user-av" id="sb-user-initials">A</div>
+      <div style="flex:1;min-width:0">
+        <div class="user-nm" id="sb-user-name">Loading…</div>
+        <div class="user-rl" id="sb-user-role">—</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="icon-btn" onclick="doLogout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div>
+      <div class="page-title">Field Capture</div>
+      <div class="breadcrumb">AssetSpatial / Capture New Asset</div>
+    </div>
+    <div class="conn-status" id="conn-status">
+      <span class="conn-dot" id="conn-dot"></span>
+      <span id="conn-label">Connecting…</span>
+    </div>
+  </header>
+
+  <div id="content">
+    <div class="capture-grid" style="display:grid;grid-template-columns:1fr 360px;gap:20px">
+
+      <!-- ── LEFT: FORM ── -->
+      <div class="wcard">
+        <div class="wcard-hd">
+          <div class="wcard-title"><i class="fa-solid fa-location-crosshairs"></i> Capture New Asset</div>
+          <button class="btn btn-ghost btn-sm" onclick="clearForm()">
+            <i class="fa-solid fa-rotate-left"></i> Clear
+          </button>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- ── SECTION: IDENTITY ── -->
+          <div class="form-section-divider" style="padding-top:0;margin-top:0;border-top:none">
+            <span class="form-section-label"><i class="fa-solid fa-id-card" style="margin-right:4px"></i>Identity</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Asset Name <span class="req">*</span></label>
+            <input class="form-control" id="cap-name" placeholder="e.g. Federal Secretariat Complex, Abuja">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asset ID</label>
+            <input class="form-control" id="cap-id" placeholder="Auto-generated" readonly>
+          </div>
+
+          <!-- ASSET CODE PREVIEW -->
+          <div class="form-group full">
+            <label class="form-label">
+              <i class="fa-solid fa-barcode" style="color:var(--blue)"></i>
+              Structured Asset Code
+            </label>
+            <div style="display:flex;align-items:center;gap:12px;background:var(--blue-bg);
+                        border:1px solid var(--blue-bd);border-radius:8px;padding:11px 16px">
+              <i class="fa-solid fa-qrcode" style="color:var(--blue);font-size:16px;flex-shrink:0"></i>
+              <span id="cap-code-preview" style="font-family:'Courier New',monospace;font-size:13px;
+                    font-weight:700;flex:1;letter-spacing:.5px;color:var(--text3)">
+                Fill MDA, Type and State to preview code…
+              </span>
+              <span id="cap-code-hq-badge" style="display:none;font-size:10px;font-weight:700;
+                    background:rgba(45,184,123,.15);color:#0f7a4d;padding:3px 9px;border-radius:20px;
+                    border:1px solid rgba(45,184,123,.3);flex-shrink:0">
+                <i class="fa-solid fa-star" style="font-size:9px"></i> HQ
+              </span>
+            </div>
+            <div class="form-hint">Auto-generated on save · Format: FGN-MDA-TYPE-BRANCH-YEAR-SEQ</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Asset Type <span class="req">*</span></label>
+            <select class="form-control" id="cap-type" onchange="renderTypeFields()">
+              <option value="">Select type…</option>
+              <option>Infrastructure</option>
+              <option>Land / Property</option>
+              <option>Utility</option>
+              <option>Environmental</option>
+              <option>Equipment</option>
+              <option>Monument</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Geometry Type</label>
+            <select class="form-control" id="cap-geom">
+              <option>Point</option><option>Polygon</option><option>Linear</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Condition</label>
+            <select class="form-control" id="cap-cond">
+              <option>Good</option><option>Fair</option><option>Poor</option><option>Critical</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assessment Status</label>
+            <div class="assess-toggle">
+              <button type="button" class="assess-btn active-assessed" id="assess-btn-assessed"
+                      onclick="setAssessment('Assessed')">
+                <i class="fa-solid fa-circle-check"></i> Assessed
+              </button>
+              <button type="button" class="assess-btn" id="assess-btn-unassessed"
+                      onclick="setAssessment('Unassessed')">
+                <i class="fa-solid fa-circle-question"></i> Unassessed
+              </button>
+            </div>
+            <input type="hidden" id="cap-assessed" value="Assessed">
+          </div>
+
+          <!-- ── SECTION: CLASSIFICATION ── -->
+          <div class="form-section-divider">
+            <span class="form-section-label"><i class="fa-solid fa-building-columns" style="margin-right:4px"></i>Classification</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">MDA / Agency <span class="req">*</span></label>
+            <select class="form-control" id="cap-mda">
+              <option value="">Select MDA…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sector</label>
+            <select class="form-control" id="cap-sector">
+              <option value="">Select sector…</option>
+              <option>Administration &amp; Governance</option>
+              <option>Defence &amp; Security</option>
+              <option>Education</option>
+              <option>Health</option>
+              <option>Infrastructure &amp; Works</option>
+              <option>Energy &amp; Power</option>
+              <option>Agriculture &amp; Food Security</option>
+              <option>Water Resources</option>
+              <option>Transportation</option>
+              <option>Finance &amp; Economy</option>
+              <option>Justice &amp; Legal Affairs</option>
+              <option>Environment</option>
+              <option>Communications &amp; Digital</option>
+              <option>Social Development</option>
+              <option>Science &amp; Technology</option>
+              <option>Trade &amp; Investment</option>
+              <option>Petroleum &amp; Mineral Resources</option>
+              <option>Labour &amp; Employment</option>
+              <option>Foreign Affairs</option>
+              <option>Culture, Tourism &amp; Sports</option>
+            </select>
+          </div>
+
+          <!-- ── SECTION: LOCATION ── -->
+          <div class="form-section-divider">
+            <span class="form-section-label"><i class="fa-solid fa-location-dot" style="margin-right:4px"></i>Location</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <select class="form-control" id="cap-state">
+              <option value="">Select state…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">LGA</label>
+            <input class="form-control" id="cap-lga" placeholder="Local Government Area">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Address / Location Description</label>
+            <input class="form-control" id="cap-address" placeholder="e.g. No. 5 Shehu Shagari Way, Abuja">
+          </div>
+
+          <!-- GPS -->
+          <div class="form-group full">
+            <label class="form-label"><i class="fa-solid fa-satellite-dish" style="color:var(--blue)"></i> GPS Coordinates <span class="req">*</span></label>
+            <div class="gps-block">
+              <span class="gps-coords" id="gps-display">No coordinates captured</span>
+              <span class="gps-accuracy" id="gps-accuracy"></span>
+              <button class="btn btn-gps btn-sm" onclick="captureGPS()" id="gps-btn">
+                <i class="fa-solid fa-location-crosshairs"></i> Capture GPS
+              </button>
+            </div>
+            <input type="hidden" id="cap-lat">
+            <input type="hidden" id="cap-lng">
+            <div class="form-hint">Captures real GPS from your device</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Elevation (m)</label>
+            <input class="form-control" id="cap-elev" type="number" placeholder="e.g. 45">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Area / Dimension</label>
+            <input class="form-control" id="cap-area" placeholder="e.g. 250 m²">
+          </div>
+
+          <!-- ── SECTION: DATES ── -->
+          <div class="form-section-divider">
+            <span class="form-section-label"><i class="fa-solid fa-calendar" style="margin-right:4px"></i>Dates</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Capture Date</label>
+            <input class="form-control" type="date" id="cap-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Installation Date</label>
+            <input class="form-control" type="date" id="cap-install-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Inspection Date</label>
+            <input class="form-control" type="date" id="cap-next-inspection">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Material</label>
+            <input class="form-control" id="cap-material" placeholder="e.g. Concrete, Steel">
+          </div>
+
+          <!-- ── SECTION: NOTES ── -->
+          <div class="form-section-divider">
+            <span class="form-section-label"><i class="fa-solid fa-note-sticky" style="margin-right:4px"></i>Notes</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group full">
+            <textarea class="form-control" id="cap-notes" rows="3"
+              placeholder="Additional observations, condition details, access notes…"></textarea>
+          </div>
+
+          <!-- ── TYPE-SPECIFIC FIELDS ── -->
+          <div id="type-specific-wrap" class="full" style="display:none">
+            <div class="form-section-divider" style="margin-top:0">
+              <span class="form-section-label" id="type-fields-label">
+                <i class="fa-solid fa-sliders" style="margin-right:4px"></i>Type-Specific Fields
+              </span>
+              <div style="flex:1;height:1px;background:var(--border)"></div>
+            </div>
+            <div class="form-grid" style="padding:0;margin-top:16px" id="type-fields-inner"></div>
+          </div>
+
+          <!-- ── SECTION: PHOTOS ── -->
+          <div class="form-section-divider">
+            <span class="form-section-label"><i class="fa-solid fa-camera" style="margin-right:4px"></i>Photos</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+
+          <div class="form-group full">
+            <div class="photo-drop" id="photo-drop-zone" onclick="document.getElementById('photo-input').click()">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p>Click or drag photos here</p>
+              <span>JPG, PNG, WEBP · Max 15MB each</span>
+              <input type="file" id="photo-input" accept="image/*" multiple style="display:none"
+                     onchange="handlePhotoFiles(this.files)">
+            </div>
+            <div id="photo-preview"></div>
+          </div>
+
+          <!-- ── SUBMIT ── -->
+          <div class="full" style="display:flex;gap:10px;padding-top:8px;border-top:1px solid var(--border)">
+            <button class="btn btn-primary" style="flex:1" onclick="submitCapture()" id="submit-btn">
+              <i class="fa-solid fa-floppy-disk"></i> Submit Capture
+            </button>
+            <button class="btn btn-ghost" onclick="clearForm()">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+          </div>
+
+        </div><!-- /form-grid -->
+      </div><!-- /wcard -->
+
+      <!-- ── RIGHT: PREVIEW + RECENT ── -->
+      <div class="right-panel">
+
+        <!-- LOCATION PREVIEW -->
+        <div class="wcard">
+          <div class="wcard-hd">
+            <div class="wcard-title"><i class="fa-solid fa-map-pin"></i> Location Preview</div>
+          </div>
+          <div id="preview-map"></div>
+          <div class="coords-label" id="preview-coords-label">No coordinates captured</div>
+        </div>
+
+        <!-- RECENT CAPTURES -->
+        <div class="wcard" style="flex:1">
+          <div class="wcard-hd">
+            <div class="wcard-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent</div>
+            <a href="assets.html" class="btn btn-ghost btn-sm">All assets</a>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="recent-table">
+              <thead><tr><th>Name</th><th>Type</th><th>When</th></tr></thead>
+              <tbody id="recent-captures">
+                <tr><td colspan="3" style="color:var(--text3);font-size:12px;padding:16px;text-align:center">No recent captures</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<script src="js/api.js"></script>
+<script src="js/assetCodeIndex.js"></script>
+<script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/asset_detail.js"></script>
+<script src="js/capture.js"></script>
+<script>
+function doLogout() {
+  apiLogout().finally(() => { localStorage.removeItem('as_token'); window.location.href = 'login.html'; });
+}
+
+function setAssessment(val) {
+  document.getElementById('cap-assessed').value = val;
+  const btnA = document.getElementById('assess-btn-assessed');
+  const btnU = document.getElementById('assess-btn-unassessed');
+  if (val === 'Assessed') {
+    btnA.classList.add('active-assessed');    btnA.classList.remove('active-unassessed');
+    btnU.classList.remove('active-assessed'); btnU.classList.remove('active-unassessed');
+  } else {
+    btnU.classList.add('active-unassessed');  btnU.classList.remove('active-assessed');
+    btnA.classList.remove('active-assessed'); btnA.classList.remove('active-unassessed');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href = 'login.html'; return; }
+
+  checkApiHealth();
+
+  // Set user badge
+  const u = getCurrentUser();
+  if (u) {
+    const ini = document.getElementById('sb-user-initials');
+    const nm  = document.getElementById('sb-user-name');
+    const rl  = document.getElementById('sb-user-role');
+    if (ini) ini.textContent = (u.name||u.username||'A').slice(0,2).toUpperCase();
+    if (nm)  nm.textContent  = u.name||u.username||'User';
+    if (rl)  rl.textContent  = u.role||'—';
+  }
+
+  // Sidebar
+  document.getElementById('menu-toggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.toggle('open');
+    document.getElementById('sidebar-overlay')?.classList.toggle('open');
+  });
+  document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-overlay')?.classList.remove('open');
+  });
+
+  // States
+  ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River',
+   'Delta','Ebonyi','Edo','Ekiti','Enugu','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina',
+   'Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau',
+   'Rivers','Sokoto','Taraba','Yobe','Zamfara','FCT'].forEach(s => {
+    const o = document.createElement('option'); o.value = s; o.textContent = s;
+    document.getElementById('cap-state').appendChild(o);
+  });
+
+  // Photo drop zone
+  const dz = document.getElementById('photo-drop-zone');
+  dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    handlePhotoFiles(e.dataTransfer.files);
+  });
+
+  initCaptureForm();
+  loadRecentCaptures();
+});
+</script>
+</body>
+</html>

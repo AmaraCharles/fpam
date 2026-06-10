@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Audit Log — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="inspections.html">
+  <i class="fa-solid fa-clipboard-check"></i>Inspections
+</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item active" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">AUDIT LOG</div><div class="breadcrumb">AssetSpatial / System / Audit</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+    </div>
+  </header>
+  <div id="content">
+    <!-- FILTERS -->
+    <div class="filter-bar" style="margin-bottom:16px">
+      <select class="filter-input" id="f-action" onchange="loadAudit()">
+        <option value="">All Actions</option>
+        <option>ASSET_CREATED</option><option>ASSET_UPDATED</option><option>ASSET_DELETED</option>
+        <option>PHOTO_ATTACHED</option><option>PHOTO_DELETED</option>
+        <option>USER_CREATED</option><option>USER_UPDATED</option><option>USER_REMOVED</option>
+        <option>USER_LOGIN</option><option>USER_LOGOUT</option>
+        <option>EXPORT</option><option>BULK_DELETE</option>
+        <option>OCR_SCAN</option>
+        <option>SETTINGS_CHANGED</option><option>ROLE_CONFIG_CHANGED</option>
+      </select>
+      <select class="filter-input" id="f-entity" onchange="loadAudit()">
+        <option value="">All Entities</option>
+        <option>Asset</option><option>User</option><option>System</option><option>RoleConfig</option>
+      </select>
+      <input class="filter-input" type="date" id="f-from" onchange="loadAudit()" title="From date">
+      <input class="filter-input" type="date" id="f-to" onchange="loadAudit()" title="To date">
+      <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap" style="margin-bottom:16px">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Action</th><th>Entity</th><th>Performed By</th><th>IP</th><th>Timestamp</th><th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody">
+          <tr><td colspan="7"><div class="empty-state" style="padding:36px"><div class="empty-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="empty-title">No audit entries</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3)">
+      <div id="audit-info">Showing 0 entries</div>
+      <div style="display:flex;gap:6px" id="audit-pagination"></div>
+    </div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/audit.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+function clearFilters() {
+  ['f-action','f-entity','f-from','f-to'].forEach(id=>{ document.getElementById(id).value=''; });
+  loadAudit();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  loadAudit();
+});
+</script>
+</body>
+</html>

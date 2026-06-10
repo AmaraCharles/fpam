@@ -1,0 +1,77 @@
+<!-- sidebar.html — loaded dynamically by each page -->
+<div id="sidebar">
+  <button id="sidebar-close" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;display:none;" class="mobile-only">
+    <i class="fa fa-xmark"></i>
+  </button>
+
+  <div class="logo-wrap">
+    <div class="logo-icon"><i class="fa fa-map-location-dot"></i></div>
+    <div class="logo-text">
+      <div class="logo-mark">AssetSpatial</div>
+      <div class="logo-sub">Federal Asset Registry</div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html" data-page="dashboard">
+      <i class="fa fa-gauge-high"></i> Dashboard
+      <span class="nav-badge" id="sb-badge-assets"></span>
+    </a>
+    <a class="nav-item" href="map.html" data-page="map">
+      <i class="fa fa-map"></i> Live Map
+    </a>
+    <a class="nav-item" href="assets.html" data-page="assets">
+      <i class="fa fa-database"></i> Asset Registry
+    </a>
+
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html" data-page="capture">
+      <i class="fa fa-location-crosshairs"></i> Field Capture
+    </a>
+    <a class="nav-item" href="analytics.html" data-page="analytics">
+      <i class="fa fa-chart-bar"></i> Analytics
+    </a>
+    <a class="nav-item" href="users.html" data-page="users">
+      <i class="fa fa-users"></i> Users
+      <span class="nav-badge" id="sb-badge-users"></span>
+    </a>
+
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html" data-page="ocr">
+      <i class="fa fa-file-magnifying-glass"></i> OCR Scanner
+    </a>
+    <a class="nav-item" href="excel.html" data-page="excel">
+      <i class="fa fa-file-excel"></i> Excel Import
+    </a>
+    <a class="nav-item" href="filedb.html" data-page="filedb">
+      <i class="fa fa-folder-open"></i> File Database
+    </a>
+
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html" data-page="audit">
+      <i class="fa fa-clock-rotate-left"></i> Audit Log
+    </a>
+    <a class="nav-item" href="settings.html" data-page="settings">
+      <i class="fa fa-sliders"></i> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="user-card" onclick="window.location.href='settings.html'">
+      <div class="avatar" id="sb-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sb-name">Loading…</div>
+        <div class="user-role" id="sb-role">—</div>
+      </div>
+      <div class="user-card-actions">
+        <button class="icon-btn" title="Toggle dark mode" onclick="event.stopPropagation();toggleDark()">
+          <i class="fa fa-moon" id="dark-icon"></i>
+        </button>
+        <button class="icon-btn" title="Logout" onclick="event.stopPropagation();Auth.logout()">
+          <i class="fa fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

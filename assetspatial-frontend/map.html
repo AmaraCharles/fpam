@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Live Map — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+#leaflet-map { height: calc(100vh - var(--header-h) - 56px); width: 100%; }
+.map-controls {
+  display:flex;gap:10px;padding:10px 16px;align-items:center;flex-wrap:wrap;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.map-chip-strip {
+  display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;
+  background:var(--surface2);border-top:1px solid var(--border);
+  align-items:center;min-height:40px;font-size:11px;
+}
+.map-chip {
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;font-family:'Space Mono',monospace;
+}
+.map-chip:hover { border-color:var(--accent);color:var(--accent); }
+.map-sidebar-panel {
+  position:absolute;top:0;right:0;width:300px;height:100%;background:var(--surface);
+  border-left:1px solid var(--border);z-index:500;overflow-y:auto;
+  transform:translateX(100%);transition:transform .25s ease;
+}
+.map-sidebar-panel.open { transform:none; }
+</style>
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item active" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">LIVE MAP</div><div class="breadcrumb">AssetSpatial / Spatial View</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleMapType()" id="map-type-btn"><i class="fa-solid fa-layer-group"></i> Satellite</button>
+      <button class="btn btn-secondary btn-sm" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs"></i> Locate Me</button>
+      <button class="btn btn-secondary btn-sm" onclick="fitAllMarkers()"><i class="fa-solid fa-maximize"></i> Fit All</button>
+    </div>
+  </header>
+  <!-- FILTER STRIP -->
+  <div class="map-controls">
+    <select class="filter-input" id="map-filter-type" onchange="filterMap()" style="font-size:12px">
+      <option value="">All Types</option>
+      <option>Infrastructure</option><option>Land / Property</option><option>Utility</option><option>Environmental</option><option>Equipment</option>
+    </select>
+    <select class="filter-input" id="map-filter-cond" onchange="filterMap()" style="font-size:12px">
+      <option value="">All Conditions</option>
+      <option>Good</option><option>Fair</option><option>Poor</option><option>Critical</option>
+    </select>
+    <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">
+      <i class="fa-solid fa-circle" style="color:var(--accent);font-size:8px"></i> Good &nbsp;
+      <i class="fa-solid fa-circle" style="color:var(--warn);font-size:8px"></i> Fair &nbsp;
+      <i class="fa-solid fa-circle" style="color:var(--danger);font-size:8px"></i> Poor/Critical
+    </span>
+    <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)" id="map-count">0 assets</span>
+  </div>
+  <!-- MAP -->
+  <div style="position:relative;flex:1">
+    <div id="leaflet-map"></div>
+    <!-- INFO PANEL -->
+    <div id="map-info-panel" class="map-sidebar-panel">
+      <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">Asset Detail</div>
+        <button class="icon-btn" onclick="closeInfoPanel()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="map-info-content" style="padding:16px"></div>
+    </div>
+  </div>
+  <!-- CHIP STRIP -->
+  <div class="map-chip-strip">
+    <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-right:4px;text-transform:uppercase">Assets</span>
+    <span id="map-chip-empty" style="color:var(--text3);font-size:11px">Loading…</span>
+    <div id="map-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/map.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  initMap();
+});
+</script>
+</body>
+</html>

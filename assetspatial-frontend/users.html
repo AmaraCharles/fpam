@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Users — AssetSpatial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+<aside id="sidebar">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-map-location-dot"></i></div><div class="logo-text"><div class="logo-mark">AssetSpatial</div><div class="logo-sub">Federal Registry</div></div></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+    <a class="nav-item" href="map.html"><i class="fa-solid fa-map"></i>Live Map</a>
+    <a class="nav-item" href="assets.html"><i class="fa-solid fa-database"></i>Asset Registry</a>
+    <div class="nav-section">Management</div>
+    <a class="nav-item" href="capture.html"><i class="fa-solid fa-location-crosshairs"></i>Field Capture</a>
+    <a class="nav-item" href="inspections.html">
+  <i class="fa-solid fa-clipboard-check"></i>Inspections
+</a>
+    <a class="nav-item" href="analytics.html"><i class="fa-solid fa-chart-bar"></i>Analytics</a>
+    <a class="nav-item active" href="users.html"><i class="fa-solid fa-users"></i>Users</a>
+    <div class="nav-section">Data Tools</div>
+    <a class="nav-item" href="ocr.html"><i class="fa-solid fa-file-magnifying-glass"></i>OCR Scanner</a>
+    <a class="nav-item" href="excel.html"><i class="fa-solid fa-file-excel"></i>Excel Import</a>
+    <a class="nav-item" href="filedb.html"><i class="fa-solid fa-folder-open"></i>File Database</a>
+    <div class="nav-section">System</div>
+    <a class="nav-item" href="audit.html"><i class="fa-solid fa-clock-rotate-left"></i>Audit Log</a>
+    <a class="nav-item" href="settings.html"><i class="fa-solid fa-sliders"></i>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button class="icon-btn" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<div id="main">
+  <header id="header">
+    <button id="menu-toggle" class="menu-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="header-title"><div class="page-title">USER MANAGEMENT</div><div class="breadcrumb">AssetSpatial / Users</div></div>
+    <div class="header-actions" style="margin-left:auto">
+      <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
+      <select class="filter-input" id="filter-role" onchange="loadUsers()" style="font-size:12px">
+        <option value="">All Roles</option>
+        <option>Field Agent</option><option>Supervisor</option><option>GIS Analyst</option><option>System Admin</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openCreateUser()"><i class="fa-solid fa-user-plus"></i> Add User</button>
+    </div>
+  </header>
+  <div id="content">
+    <!-- TABS -->
+    <div style="display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:20px">
+      <button class="tab-btn active" id="tab-cards" onclick="switchTab('cards')"><i class="fa-solid fa-id-card"></i> User Cards</button>
+      <button class="tab-btn" id="tab-perms" onclick="switchTab('perms')"><i class="fa-solid fa-shield-halved"></i> Role Permissions</button>
+    </div>
+
+    <!-- CARDS VIEW -->
+    <div id="view-cards">
+      <div id="users-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- PERMISSIONS VIEW -->
+    <div id="view-perms" style="display:none">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+        <!-- Field Agent -->
+        <div class="surface-card" id="perm-card-field">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-user-helmet-safety" style="color:var(--accent)"></i> Field Agent</div>
+            <button class="btn btn-ghost btn-xs" onclick="saveRoleConfig('Field Agent')"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          </div>
+          <div style="padding:14px" id="perm-body-field"></div>
+        </div>
+        <!-- Supervisor -->
+        <div class="surface-card" id="perm-card-super">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-user-tie" style="color:var(--info)"></i> Supervisor</div>
+            <button class="btn btn-ghost btn-xs" onclick="saveRoleConfig('Supervisor')"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          </div>
+          <div style="padding:14px" id="perm-body-super"></div>
+        </div>
+        <!-- GIS Analyst -->
+        <div class="surface-card" id="perm-card-gis">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-globe" style="color:var(--warn)"></i> GIS Analyst</div>
+            <button class="btn btn-ghost btn-xs" onclick="saveRoleConfig('GIS Analyst')"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          </div>
+          <div style="padding:14px" id="perm-body-gis"></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <button class="btn btn-danger btn-sm" onclick="resetRoleConfigs()"><i class="fa-solid fa-rotate-left"></i> Reset All to Defaults</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal" style="width:600px">
+    <div class="modal-header"><div class="modal-title" id="modal-title">Add User</div><button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body"><div id="modal-body-inner"></div></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
+
+<style>
+.tab-btn { background:none;border:none;border-bottom:2px solid transparent;padding:10px 16px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:7px;transition:all .15s; }
+.tab-btn.active { color:var(--accent);border-bottom-color:var(--accent); }
+.tab-btn:hover { color:var(--text); }
+.spinner { width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block; }
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/users.js"></script>
+<script>
+function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+function switchTab(t) {
+  document.getElementById('view-cards').style.display = t==='cards'?'block':'none';
+  document.getElementById('view-perms').style.display = t==='perms'?'block':'none';
+  document.getElementById('tab-cards').classList.toggle('active', t==='cards');
+  document.getElementById('tab-perms').classList.toggle('active', t==='perms');
+  if (t==='perms') loadRoleConfigs();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
+  initTheme(); renderUserBadge(); checkApiHealth();
+  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
+  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  document.getElementById('modal-overlay')?.addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
+  loadUsers();
+});
+</script>
+</body>
+</html>
