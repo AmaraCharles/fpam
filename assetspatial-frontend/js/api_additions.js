@@ -12,7 +12,7 @@ window.AS_BACKEND = window.AS_BACKEND || {
 // Quick helper — auto-detects by probing /api/health-extras once
 (async () => {
   try {
-    const r = await fetch((window.API_BASE||'http://localhost:3001/api') + '/health-extras',
+    const r = await fetch((window.API_BASE||'https://fpambacend.onrender.com/api') + '/health-extras',
       { headers: { Authorization: 'Bearer ' + (localStorage.getItem('as_token')||'') } });
     if (r.ok) {
       const d = await r.json().catch(()=>({}));

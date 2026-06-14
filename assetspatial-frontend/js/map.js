@@ -9,10 +9,10 @@ const TILES = {
   satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 };
 
-const COND_COLORS = { Good:'#00c864', Fair:'#f0b400', Poor:'rgba(240,120,0,0.9)', Critical:'#e05555' };
+const COND_COLORS = { Good:'#2DB87B', Fair:'#f0a500', Poor:'#f07000', Critical:'#e05555' };
 
 function markerIcon(cond) {
-  const color = COND_COLORS[cond] || '#8aab96';
+  const color = COND_COLORS[cond] || '#5A6A7A';
   return L.divIcon({
     className: '',
     html: `<div style="width:14px;height:14px;background:${color};border:2px solid rgba(255,255,255,.85);border-radius:50%;box-shadow:0 0 8px ${color}66;transition:transform .2s"></div>`,
@@ -79,28 +79,19 @@ async function renderMap() {
     m.bindPopup(`<div style="font-family:'Space Grotesk',sans-serif;min-width:160px">
       <strong style="font-size:13px">${escHtml(a.name||a.assetId||a.id)}</strong><br>
       <span style="font-size:11px;color:#666">${escHtml(a.type)} · <span style="color:${COND_COLORS[a.condition]||'#aaa'}">${escHtml(a.condition)}</span></span><br>
-      <span style="font-family:'Space Mono',monospace;font-size:10px;color:#00c864">${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</span>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:#4A90D9">${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</span>
     </div>`, { maxWidth: 240 });
 
     leafletMarkers.push(m);
   });
 
-  // Render chip strip
-  const chipsEl = document.getElementById('map-chips');
-  const emptyEl = document.getElementById('map-chip-empty');
-  if (chipsEl && emptyEl) {
-    if (!validAssets.length) {
-      emptyEl.style.display = 'inline';
-      emptyEl.textContent = mapAssets.length ? 'No located assets match filters' : 'No assets with GPS coordinates';
-      chipsEl.innerHTML = '';
-    } else {
-      emptyEl.style.display = 'none';
-      chipsEl.innerHTML = validAssets.slice(0, 30).map(a => {
-        const lat = a.lat || a.location?.coordinates?.[1];
-        const lng = a.lng || a.location?.coordinates?.[0];
-        return `<button class="map-chip" onclick="flyToAsset(${lat},${lng})">${escHtml(a.name||a.assetId||a.id)}</button>`;
-      }).join('');
-    }
+  // Update count badge on search toggle
+  const cntEl = document.getElementById('map-count');
+  if (cntEl) cntEl.textContent = validAssets.length;
+
+  // Feed all assets to the search panel
+  if (typeof window._onMapAssetsLoaded === 'function') {
+    window._onMapAssetsLoaded(mapAssets);
   }
 }
 
@@ -121,14 +112,15 @@ function showMapInfoPanel(a) {
     </div>
     <div style="display:grid;gap:10px;font-size:12px">
       <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Coordinates</span>
-        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent)">${typeof lat==='number'?lat.toFixed(6):lat}°N, ${typeof lng==='number'?lng.toFixed(6):lng}°E</span></div>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:#4A90D9">${typeof lat==='number'?lat.toFixed(6):lat}°N, ${typeof lng==='number'?lng.toFixed(6):lng}°E</span></div>
       <div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Geometry</span>${geomIcon(a.geomType||a.geom)} ${escHtml(a.geomType||a.geom||'—')}</div>
       ${a.state?`<div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Location</span>${escHtml(a.state)}${a.lga?', '+escHtml(a.lga):''}</div>`:''}
       ${a.material?`<div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Material</span>${escHtml(a.material)}</div>`:''}
       ${a.notes?`<div><span style="color:var(--text3);font-family:'Space Mono',monospace;font-size:9px;display:block;text-transform:uppercase;margin-bottom:2px">Notes</span><span style="color:var(--text2)">${escHtml(a.notes)}</span></div>`:''}
     </div>
     <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <a href="assets.html" class="btn btn-primary btn-sm" style="font-size:11px"><i class="fa-solid fa-database"></i> View in Registry</a>
+      <a href="asset-view.html?id=${encodeURIComponent(a.assetId||a.id)}" class="btn btn-primary btn-sm" style="font-size:11px"><i class="fa-solid fa-eye"></i> View Detail</a>
+      <a href="assets.html?highlight=${encodeURIComponent(a.assetId||a.id)}" class="btn btn-secondary btn-sm" style="font-size:11px"><i class="fa-solid fa-database"></i> Registry</a>
       <button class="btn btn-secondary btn-sm" style="font-size:11px" onclick="leafletMap.flyTo([${lat},${lng}],16)"><i class="fa-solid fa-location-dot"></i> Zoom In</button>
     </div>`;
 

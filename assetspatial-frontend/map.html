@@ -3,33 +3,172 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Live Map — AssetSpatial</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="css/main.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-#leaflet-map { height: calc(100vh - var(--header-h) - 56px); width: 100%; }
-.map-controls {
-  display:flex;gap:10px;padding:10px 16px;align-items:center;flex-wrap:wrap;
-  background:var(--surface);border-bottom:1px solid var(--border);
+*, *::before, *::after { box-sizing: border-box; }
+#main { overflow: hidden; display: flex; flex-direction: column; }
+
+/* Map wrap fills everything below header — no filter strip row */
+#map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
-.map-chip-strip {
-  display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;
-  background:var(--surface2);border-top:1px solid var(--border);
-  align-items:center;min-height:40px;font-size:11px;
+
+/* Leaflet map fills entire wrap */
+#leaflet-map {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
 }
-.map-chip {
-  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
-  padding:3px 10px;font-size:11px;cursor:pointer;transition:all .15s;font-family:'Space Mono',monospace;
+
+/* MapLibre GL (3D) fills same space, hidden by default */
+#maplibre-map {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: none;
 }
-.map-chip:hover { border-color:var(--accent);color:var(--accent); }
+
+/* ── Floating filter bar — top-left inside map ── */
+#map-float-filters {
+  position: absolute; top: 14px; left: 14px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  z-index: 600;
+}
+.map-float-select {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #0B1829;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235A6A7A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.map-float-select:focus { border-color: #4A90D9; }
+
+/* Legend pill */
+#map-legend-pill {
+  background: rgba(255,255,255,.95);
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  color: #2C3E50;
+}
+
+/* Top-right controls group */
+#map-top-right {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-end;
+  z-index: 600;
+}
+.map-ctrl-btn {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.14);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #0B1829;
+  transition: all .15s;
+  white-space: nowrap;
+  min-width: 130px;
+  justify-content: center;
+}
+.map-ctrl-btn:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,.18);
+  border-color: #4A90D9;
+  color: #4A90D9;
+}
+.map-ctrl-btn.active {
+  background: #4A90D9;
+  color: #fff;
+  border-color: #4A90D9;
+}
+
+/* ── Floating search toggle — bottom centre ── */
+#map-search-toggle {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #fff; border: 1px solid rgba(0,0,0,.12);
+  border-radius: 24px; padding: 9px 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.14);
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; z-index: 600;
+  font-size: 13px; font-weight: 600; color: #0B1829;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: box-shadow .15s; white-space: nowrap;
+}
+#map-search-toggle:hover { box-shadow: 0 6px 32px rgba(0,0,0,.2); }
+#map-search-toggle i { color: #4A90D9; }
+
+/* ── Search panel ── */
+#map-search-panel {
+  position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+  width: min(480px, 90vw);
+  background: #fff; border: 1px solid rgba(0,0,0,.1);
+  border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,.18);
+  z-index: 600; overflow: hidden; display: none;
+}
+#map-search-panel.open { display: block; }
+.msp-header {
+  padding: 12px 16px; border-bottom: 1px solid #E8ECF0;
+  display: flex; align-items: center; gap: 8px;
+}
+.msp-header input {
+  flex: 1; border: none; outline: none; font-size: 13px;
+  color: #0B1829; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.msp-header input::placeholder { color: #5A6A7A; }
+.msp-results { max-height: 260px; overflow-y: auto; }
+.msp-result {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; cursor: pointer;
+  border-bottom: 1px solid #E8ECF0; transition: background .1s;
+}
+.msp-result:last-child { border-bottom: none; }
+.msp-result:hover { background: rgba(74,144,217,.05); }
+.msp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.msp-name { font-size: 13px; font-weight: 600; color: #0B1829; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msp-meta { font-size: 11px; color: #5A6A7A; flex-shrink: 0; }
+.msp-empty { padding: 24px; text-align: center; color: #5A6A7A; font-size: 13px; }
+.msp-footer { padding: 10px 16px; border-top: 1px solid #E8ECF0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #5A6A7A; }
+
+/* ── Asset info side panel ── */
 .map-sidebar-panel {
-  position:absolute;top:0;right:0;width:300px;height:100%;background:var(--surface);
-  border-left:1px solid var(--border);z-index:500;overflow-y:auto;
-  transform:translateX(100%);transition:transform .25s ease;
+  position: absolute; top: 0; right: 0; width: 300px; height: 100%;
+  background: #fff; border-left: 1px solid #E8ECF0;
+  z-index: 500; overflow-y: auto;
+  transform: translateX(100%); transition: transform .25s ease;
+  box-shadow: -4px 0 24px rgba(0,0,0,.08);
 }
-.map-sidebar-panel.open { transform:none; }
+.map-sidebar-panel.open { transform: none; }
 </style>
 </head>
 <body>
@@ -55,7 +194,7 @@
   </nav>
   <div class="sidebar-bottom">
     <div class="user-card">
-      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#000">A</div>
+      <div class="user-avatar" id="sb-user-initials" style="background:var(--accent);color:#fff">A</div>
       <div class="user-info"><div class="user-name" id="sb-user-name">Loading…</div><div class="user-role" id="sb-user-role">—</div></div>
       <div style="display:flex;gap:4px;margin-left:auto">
         <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
@@ -70,54 +209,359 @@
     <div class="header-title"><div class="page-title">LIVE MAP</div><div class="breadcrumb">AssetSpatial / Spatial View</div></div>
     <div class="header-actions" style="margin-left:auto">
       <div class="conn-status" id="conn-status"><span class="conn-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span></div>
-      <button class="btn btn-secondary btn-sm" onclick="toggleMapType()" id="map-type-btn"><i class="fa-solid fa-layer-group"></i> Satellite</button>
-      <button class="btn btn-secondary btn-sm" onclick="locateMe()"><i class="fa-solid fa-location-crosshairs"></i> Locate Me</button>
-      <button class="btn btn-secondary btn-sm" onclick="fitAllMarkers()"><i class="fa-solid fa-maximize"></i> Fit All</button>
+
     </div>
   </header>
-  <!-- FILTER STRIP -->
-  <div class="map-controls">
-    <select class="filter-input" id="map-filter-type" onchange="filterMap()" style="font-size:12px">
-      <option value="">All Types</option>
-      <option>Infrastructure</option><option>Land / Property</option><option>Utility</option><option>Environmental</option><option>Equipment</option>
-    </select>
-    <select class="filter-input" id="map-filter-cond" onchange="filterMap()" style="font-size:12px">
-      <option value="">All Conditions</option>
-      <option>Good</option><option>Fair</option><option>Poor</option><option>Critical</option>
-    </select>
-    <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">
-      <i class="fa-solid fa-circle" style="color:var(--accent);font-size:8px"></i> Good &nbsp;
-      <i class="fa-solid fa-circle" style="color:var(--warn);font-size:8px"></i> Fair &nbsp;
-      <i class="fa-solid fa-circle" style="color:var(--danger);font-size:8px"></i> Poor/Critical
-    </span>
-    <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)" id="map-count">0 assets</span>
-  </div>
-  <!-- MAP -->
-  <div style="position:relative;flex:1">
+  <!-- MAP WRAP — fills all remaining height, contains everything -->
+  <div id="map-wrap">
+
+    <!-- Leaflet 2D map (default) -->
     <div id="leaflet-map"></div>
-    <!-- INFO PANEL -->
+    <!-- MapLibre GL 3D map (shown when 3D active) -->
+    <div id="maplibre-map"></div>
+
+    <!-- FLOATING FILTERS — top left -->
+    <div id="map-float-filters">
+      <select class="map-float-select" id="map-filter-type" onchange="filterMap()">
+        <option value="">All Types</option>
+        <option>Infrastructure</option><option>Land / Property</option><option>Utility</option><option>Environmental</option><option>Equipment</option>
+      </select>
+      <select class="map-float-select" id="map-filter-cond" onchange="filterMap()">
+        <option value="">All Conditions</option>
+        <option>Good</option><option>Fair</option><option>Poor</option><option>Critical</option>
+      </select>
+      <div id="map-legend-pill">
+        <i class="fa-solid fa-circle" style="color:#2DB87B;font-size:8px"></i> Good
+        <i class="fa-solid fa-circle" style="color:#f0a500;font-size:8px;margin-left:4px"></i> Fair
+        <i class="fa-solid fa-circle" style="color:#e05555;font-size:8px;margin-left:4px"></i> Poor/Critical
+      </div>
+    </div>
+
+    <!-- TOP-RIGHT CONTROLS GROUP -->
+    <div id="map-top-right">
+      <button class="map-ctrl-btn" id="map-type-btn" onclick="toggleMapType()">
+        <i class="fa-solid fa-layer-group"></i> Satellite
+      </button>
+      <button class="map-ctrl-btn" onclick="locateMe()">
+        <i class="fa-solid fa-location-crosshairs"></i> Locate Me
+      </button>
+      <button class="map-ctrl-btn" onclick="fitAllMarkers()">
+        <i class="fa-solid fa-maximize"></i> Fit All
+      </button>
+      <button class="map-ctrl-btn" id="btn-3d-toggle" onclick="toggle3DMap()">
+        <i class="fa-solid fa-cube"></i> 3D View
+      </button>
+    </div>
+
+    <!-- ASSET INFO SIDE PANEL -->
     <div id="map-info-panel" class="map-sidebar-panel">
-      <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">Asset Detail</div>
-        <button class="icon-btn" onclick="closeInfoPanel()"><i class="fa-solid fa-xmark"></i></button>
+      <div style="padding:16px;border-bottom:1px solid var(--border,#E8ECF0);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:15px;font-weight:700;color:var(--text,#0B1829)">Asset Detail</div>
+        <button onclick="closeInfoPanel()" style="background:var(--bg,#F4F6F9);border:1px solid var(--border,#E8ECF0);color:var(--text2,#2C3E50);border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="map-info-content" style="padding:16px"></div>
     </div>
-  </div>
-  <!-- CHIP STRIP -->
-  <div class="map-chip-strip">
-    <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-right:4px;text-transform:uppercase">Assets</span>
-    <span id="map-chip-empty" style="color:var(--text3);font-size:11px">Loading…</span>
-    <div id="map-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+
+    <!-- FLOATING SEARCH TOGGLE BUTTON -->
+    <div id="map-search-toggle" onclick="toggleMapSearch()">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span id="map-search-label">Search assets</span>
+      <span id="map-count" style="background:rgba(74,144,217,.1);color:var(--accent,#4A90D9);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px">0</span>
+    </div>
+
+    <!-- FLOATING SEARCH PANEL -->
+    <div id="map-search-panel">
+      <div class="msp-header">
+        <i class="fa-solid fa-magnifying-glass" style="color:var(--text3,#5A6A7A);flex-shrink:0"></i>
+        <input type="text" id="map-search-input" placeholder="Search by name, ID, state, type…"
+          oninput="filterMapSearch(this.value)" autocomplete="off">
+        <button onclick="toggleMapSearch()" style="background:none;border:none;color:var(--text3,#5A6A7A);cursor:pointer;font-size:14px;flex-shrink:0"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="msp-results" id="msp-results">
+        <div class="msp-empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading assets…</div>
+      </div>
+      <div class="msp-footer">
+        <span id="msp-count">—</span>
+        <button onclick="fitAllMarkers()" style="background:none;border:none;color:var(--accent,#4A90D9);cursor:pointer;font-size:11px;font-weight:600"><i class="fa-solid fa-maximize"></i> Fit All</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toast-msg">Done</span></div>
 
+<!-- MapLibre GL JS for 3D buildings view -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
 <script src="js/map.js"></script>
 <script>
 function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token'); window.location.href='login.html'; }); }
+
+// ── 3D MAP (MapLibre GL + OpenFreeMap tiles) ──────────────────────────────────
+let _maplibreMap = null;
+let _3dActive    = false;
+
+function toggle3DMap() {
+  _3dActive = !_3dActive;
+  const btn      = document.getElementById('btn-3d-toggle');
+  const leafletEl = document.getElementById('leaflet-map');
+  const glEl      = document.getElementById('maplibre-map');
+
+  const typeBtn = document.getElementById('map-type-btn');
+  if (_3dActive) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fa-solid fa-map"></i> 2D View';
+    leafletEl.style.display = 'none';
+    glEl.style.display = 'block';
+    if (typeBtn) typeBtn.style.display = 'none';
+    _init3DMap();
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fa-solid fa-cube"></i> 3D View';
+    leafletEl.style.display = '';
+    glEl.style.display = 'none';
+    if (typeBtn) typeBtn.style.display = '';
+  }
+}
+
+function _init3DMap() {
+  if (_maplibreMap) {
+    _maplibreMap.resize();
+    return;
+  }
+  if (!window.maplibregl) {
+    document.getElementById('maplibre-map').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:#5A6A7A">MapLibre GL failed to load</div>';
+    return;
+  }
+
+  // Get current Leaflet centre to sync position
+  const center = window.leafletMap
+    ? [window.leafletMap.getCenter().lng, window.leafletMap.getCenter().lat]
+    : [7.3986, 9.0765];
+  const zoom = window.leafletMap ? Math.max(window.leafletMap.getZoom() - 1, 1) : 6;
+
+  _maplibreMap = new maplibregl.Map({
+    container: 'maplibre-map',
+    // OpenFreeMap Positron style — free, no API key, includes 3D buildings
+    style: 'https://tiles.openfreemap.org/styles/positron',
+    center,
+    zoom,
+    pitch: 45,
+    bearing: 0,
+    antialias: true,
+  });
+
+  _maplibreMap.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+  _maplibreMap.on('load', () => {
+    // ── 3D Buildings layer ────────────────────────────────────────────────────
+    const layers = _maplibreMap.getStyle().layers;
+    // Find label layer to insert buildings below it
+    let labelLayerId;
+    for (const layer of layers) {
+      if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+        labelLayerId = layer.id;
+        break;
+      }
+    }
+
+    if (_maplibreMap.getSource('openmaptiles') || _maplibreMap.getSource('composite')) {
+      const srcId = _maplibreMap.getSource('openmaptiles') ? 'openmaptiles' : 'composite';
+      if (!_maplibreMap.getLayer('3d-buildings')) {
+        _maplibreMap.addLayer({
+          id: '3d-buildings',
+          source: srcId,
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'],
+              ['get', 'render_height'],
+              0,  '#C8D8E8',
+              50, '#A0B8CC',
+              100,'#7A9AB0',
+            ],
+            'fill-extrusion-height':        ['interpolate', ['linear'], ['zoom'], 14, 0, 14.5, ['get', 'render_height']],
+            'fill-extrusion-base':          ['interpolate', ['linear'], ['zoom'], 14, 0, 14.5, ['get', 'render_min_height']],
+            'fill-extrusion-opacity': 0.85,
+          },
+        }, labelLayerId);
+      }
+    }
+
+    // ── Plot asset markers ────────────────────────────────────────────────────
+    const COND_COLORS_3D = { Good:'#2DB87B', Fair:'#f0a500', Poor:'#f07000', Critical:'#e05555' };
+    const geojson = {
+      type: 'FeatureCollection',
+      features: (window._mapAllAssets || [])
+        .filter(a => (a.lat || a.location?.coordinates?.[1]) && (a.lng || a.location?.coordinates?.[0]))
+        .map(a => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [
+              a.lng || a.location?.coordinates?.[0],
+              a.lat || a.location?.coordinates?.[1],
+            ],
+          },
+          properties: {
+            id:    a.assetId || a.id,
+            name:  a.name || '',
+            cond:  a.condition || '',
+            type:  a.type || '',
+            color: COND_COLORS_3D[a.condition] || '#5A6A7A',
+          },
+        })),
+    };
+
+    if (!_maplibreMap.getSource('assets')) {
+      _maplibreMap.addSource('assets', { type: 'geojson', data: geojson });
+      _maplibreMap.addLayer({
+        id: 'asset-circles',
+        type: 'circle',
+        source: 'assets',
+        paint: {
+          'circle-radius':       ['interpolate', ['linear'], ['zoom'], 6, 5, 14, 10, 18, 16],
+          'circle-color':        ['get', 'color'],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#fff',
+          'circle-opacity':      0.9,
+        },
+      });
+      _maplibreMap.addLayer({
+        id: 'asset-labels',
+        type: 'symbol',
+        source: 'assets',
+        minzoom: 13,
+        layout: {
+          'text-field':       ['get', 'name'],
+          'text-font':        ['Noto Sans Regular'],
+          'text-size':        11,
+          'text-offset':      [0, 1.4],
+          'text-anchor':      'top',
+          'text-max-width':   8,
+        },
+        paint: {
+          'text-color':       '#0B1829',
+          'text-halo-color':  '#fff',
+          'text-halo-width':  2,
+        },
+      });
+    } else {
+      _maplibreMap.getSource('assets').setData(geojson);
+    }
+
+    // Click on marker → show info panel
+    _maplibreMap.on('click', 'asset-circles', e => {
+      const props = e.features[0].properties;
+      const asset = (window._mapAllAssets || []).find(a => (a.assetId||a.id) === props.id);
+      if (asset) showMapInfoPanel(asset);
+    });
+    _maplibreMap.on('mouseenter', 'asset-circles', () => { _maplibreMap.getCanvas().style.cursor = 'pointer'; });
+    _maplibreMap.on('mouseleave', 'asset-circles', () => { _maplibreMap.getCanvas().style.cursor = ''; });
+  });
+
+  // Fallback if style 404s — use OpenStreetMap vector tiles
+  _maplibreMap.on('error', () => {
+    if (_maplibreMap && !_maplibreMap._3dFallback) {
+      _maplibreMap._3dFallback = true;
+      _maplibreMap.setStyle({
+        version: 8,
+        sources: {
+          osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OpenStreetMap' }
+        },
+        layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+      });
+    }
+  });
+}
+
+// ── MAP SEARCH PANEL ─────────────────────────────────────────────────────────
+let _searchAllAssets = [];
+
+function toggleMapSearch() {
+  const panel = document.getElementById('map-search-panel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) {
+    document.getElementById('map-search-input')?.focus();
+    renderMapSearchResults(_searchAllAssets, '');
+  }
+  // Close on outside click
+  if (isOpen) {
+    setTimeout(() => {
+      document.addEventListener('click', _outsideSearchClose, { once: true });
+    }, 0);
+  }
+}
+
+function _outsideSearchClose(e) {
+  const panel  = document.getElementById('map-search-panel');
+  const toggle = document.getElementById('map-search-toggle');
+  if (panel && !panel.contains(e.target) && !toggle.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+}
+
+function filterMapSearch(q) {
+  const term = q.trim().toLowerCase();
+  const filtered = term
+    ? _searchAllAssets.filter(a =>
+        (a.name||'').toLowerCase().includes(term) ||
+        (a.assetId||a.id||'').toLowerCase().includes(term) ||
+        (a.state||'').toLowerCase().includes(term) ||
+        (a.type||'').toLowerCase().includes(term) ||
+        (a.mda||'').toLowerCase().includes(term)
+      )
+    : _searchAllAssets;
+  renderMapSearchResults(filtered, q);
+}
+
+const COND_DOT = { Good:'#2DB87B', Fair:'#f0a500', Poor:'#f07000', Critical:'#e05555' };
+
+function renderMapSearchResults(list, q) {
+  const el = document.getElementById('msp-results');
+  const cnt = document.getElementById('msp-count');
+  if (!el) return;
+
+  const withCoords = list.filter(a => a.lat || a.location?.coordinates?.[1]);
+  if (cnt) cnt.textContent = `${withCoords.length} located asset${withCoords.length !== 1 ? 's' : ''}`;
+
+  if (!withCoords.length) {
+    el.innerHTML = `<div class="msp-empty"><i class="fa-solid fa-location-slash" style="margin-right:6px"></i>${q ? 'No matches found' : 'No assets with GPS coordinates'}</div>`;
+    return;
+  }
+
+  el.innerHTML = withCoords.slice(0, 80).map(a => {
+    const lat  = a.lat || a.location?.coordinates?.[1];
+    const lng  = a.lng || a.location?.coordinates?.[0];
+    const dot  = COND_DOT[a.condition] || '#5A6A7A';
+    const name = escHtml(a.name || a.assetId || a.id);
+    const meta = [a.type, a.state].filter(Boolean).join(' · ');
+    return `<div class="msp-result" onclick="flyToAsset(${lat},${lng});showMapInfoPanel(${JSON.stringify(a).replace(/'/g,'&#39;')});document.getElementById('map-search-panel').classList.remove('open')">
+      <div class="msp-dot" style="background:${dot}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="msp-name">${name}</div>
+        ${meta ? `<div style="font-size:10px;color:var(--text3,#5A6A7A);margin-top:1px">${escHtml(meta)}</div>` : ''}
+      </div>
+      <div class="msp-meta">${escHtml(a.assetId||a.id||'')}</div>
+      <i class="fa-solid fa-location-dot" style="color:var(--accent,#4A90D9);font-size:11px;flex-shrink:0"></i>
+    </div>`;
+  }).join('');
+}
+
+// Expose to map.js so renderMap can update the search index
+window._onMapAssetsLoaded = function(assetList) {
+  _searchAllAssets = assetList;
+  window._mapAllAssets = assetList; // used by 3D map
+  const label = document.getElementById('map-search-label');
+  if (label) label.textContent = `Search ${assetList.length} assets`;
+  filterMapSearch(document.getElementById('map-search-input')?.value || '');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
   initTheme(); renderUserBadge(); checkApiHealth();

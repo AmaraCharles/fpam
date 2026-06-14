@@ -4,7 +4,7 @@
  * Falls back gracefully to localStorage when backend is unreachable.
  */
 
-const API_BASE = window.API_BASE || 'http://localhost:3001/api';
+const API_BASE = window.API_BASE || 'https://fpambacend.onrender.com/api';
 
 let _token = localStorage.getItem('as_token') || null;
 let _apiOnline = false;
@@ -262,7 +262,6 @@ async function populateMdaSelect(selectId, selectedValue = '') {
   });
 }
 
-
 // ── Core fetch helpers ────────────────────────────────────────────────────────
 function authHeaders() {
   const h = { 'Content-Type': 'application/json' };
@@ -319,7 +318,7 @@ function updateConnIndicator(online) {
 // Check API health on load
 async function checkApiHealth() {
   try {
-    const r = await fetch(`${window.API_BASE || 'http://localhost:3001'}/health`);
+    const r = await fetch(`${window.API_BASE || 'https://fpambacend.onrender.com'}/health`);
     if (r.ok) { _apiOnline = true; updateConnIndicator(true); }
   } catch { _apiOnline = false; updateConnIndicator(false); }
 }
@@ -373,10 +372,10 @@ function renderPhotoPreviews(files) {
 // Map page aliases
 window.initMap       = ()     => typeof renderMap !== 'undefined' ? renderMap() : null;
 window.filterMap     = ()     => typeof renderMap !== 'undefined' ? renderMap() : null;
-const toggleMapType = ()     => { if(window._mapSat) { setLeafletLayer('road'); window._mapSat=false; document.getElementById('map-type-btn').innerHTML='<i class="fa-solid fa-layer-group"></i> Satellite'; } else { setLeafletLayer('satellite'); window._mapSat=true; document.getElementById('map-type-btn').innerHTML='<i class="fa-solid fa-globe"></i> Road Map'; } };
-const locateMe      = ()     => { if(!navigator.geolocation||!leafletMap){toast('Geolocation not supported','fa-triangle-exclamation',true);return;} navigator.geolocation.getCurrentPosition(p=>{leafletMap.flyTo([p.coords.latitude,p.coords.longitude],14);},()=>toast('Could not get location','fa-triangle-exclamation',true)); };
-const fitAllMarkers = ()     => leafletFitAll ? leafletFitAll() : null;
-const closeInfoPanel= ()     => { document.getElementById('map-info-panel')?.classList.remove('open'); };
+window.toggleMapType = ()     => { if(window._mapSat) { setLeafletLayer('road'); window._mapSat=false; document.getElementById('map-type-btn').innerHTML='<i class="fa-solid fa-layer-group"></i> Satellite'; } else { setLeafletLayer('satellite'); window._mapSat=true; document.getElementById('map-type-btn').innerHTML='<i class="fa-solid fa-globe"></i> Road Map'; } };
+window.locateMe      = ()     => { if(!navigator.geolocation||!window.leafletMap){toast('Geolocation not supported','fa-triangle-exclamation',true);return;} navigator.geolocation.getCurrentPosition(p=>{window.leafletMap.flyTo([p.coords.latitude,p.coords.longitude],14);},()=>toast('Could not get location','fa-triangle-exclamation',true)); };
+window.fitAllMarkers = ()     => typeof leafletFitAll !== 'undefined' ? leafletFitAll() : null;
+window.closeInfoPanel= ()     => { document.getElementById('map-info-panel')?.classList.remove('open'); };
 
 // Assets page
 // (window. assignments avoid redeclaration conflicts when assets.js also defines these)
