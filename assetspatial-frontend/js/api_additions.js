@@ -5,7 +5,7 @@ window.AS_BACKEND = window.AS_BACKEND || {
   relationships: false,   // set true after mounting asset_extras_routes.js
   lifecycle:     false,   // set true after mounting asset_extras_routes.js
   inspections:   false,   // set true after mounting inspection_routes.js
-  bulkUpdate:    false,   // set true after mounting asset_extras_routes.js
+  bulkUpdate:    false,   // set true afer mounting asset_extras_routes.js
   completeness:  false,   // set true after mounting asset_extras_routes.js
 };
 
