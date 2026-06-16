@@ -410,12 +410,49 @@ table.rt tbody tr:hover { background: rgba(74,144,217,.04); }
 #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 39; }
 #sidebar-overlay.open { display: block; }
 
+/* Recent Captures + Activity Feed split row */
+.dash-split-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Charts row (By Condition / By Type / Captures) */
+.dash-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   #sidebar { position: fixed; top:0; left:0; bottom:0; transform: translateX(-100%); z-index: 200; }
   #sidebar.open { transform: translateX(0); }
   .menu-toggle-btn { display: flex; align-items: center; }
   .stats-row { grid-template-columns: repeat(2,1fr); }
+
+  /* Turn the split row into a swipeable carousel instead of letting it
+     overflow horizontally (which on mobile browsers can drag the whole
+     page sideways, taking the header/hamburger out of view with it). */
+  .dash-split-row {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 4px; /* room for any scrollbar without clipping content */
+  }
+  .dash-split-row > .wcard {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: center;
+  }
+  .dash-split-row::-webkit-scrollbar { height: 0; }
+
+  .dash-charts-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   .stats-row { grid-template-columns: 1fr 1fr; }
@@ -576,7 +613,7 @@ table.rt tbody tr:hover { background: rgba(74,144,217,.04); }
     </div>
 
     <!-- TWO COL -->
-    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;margin-bottom:24px">
+    <div class="dash-split-row">
 
       <!-- RECENT CAPTURES -->
       <div class="wcard">
@@ -639,7 +676,7 @@ table.rt tbody tr:hover { background: rgba(74,144,217,.04); }
 </div>
     <!-- CHARTS ROW -->
     <div class="section-hd"><div class="section-title">Analytics Overview</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+    <div class="dash-charts-row">
       <div class="wcard">
         <div class="wcard-hd"><div class="wcard-title">By Condition</div></div>
         <div style="padding:16px;height:210px;position:relative"><canvas id="cond-chart"></canvas></div>
@@ -679,6 +716,7 @@ table.rt tbody tr:hover { background: rgba(74,144,217,.04); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="js/asset_detail.js"></script>
 <script src="js/dashboard.js"></script>
+<script src="js/notifications.js"></script>
 <script src="js/inspections.js"></script>
 
 <script>
@@ -698,11 +736,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   checkApiHealth();
 
-  // NOTE: menu-toggle / sidebar-overlay click listeners are already registered
-  // globally in app.js's DOMContentLoaded handler — duplicating them here meant
-  // every tap fired both listeners, toggling the sidebar open then immediately
-  // closed again on the same click, making the hamburger appear non-functional.
-
+  document.getElementById('menu-toggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.toggle('open');
+    document.getElementById('sidebar-overlay')?.classList.toggle('open');
+  });
+  document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-overlay')?.classList.remove('open');
+  });
   document.addEventListener('click', e => {
     const w = document.getElementById('global-search-wrap');
     if (w && !w.contains(e.target)) document.getElementById('global-search-dropdown')?.classList.remove('open');
