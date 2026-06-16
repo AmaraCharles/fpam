@@ -83,10 +83,25 @@ async function parseBulkUpdateFile(file) {
     _bulkUpdateRows = valid;
 
     // Load current asset data for diff preview
+    // The backend hard-caps any single /assets request at 200 records
+    // (assetService.js listAssets: Math.min(200, limit)), so limit:5000 was
+    // silently only returning the first 200 — every assetId outside that
+    // window would incorrectly show up as "not found". Page through it all.
     let currentAssets = [];
     try {
-      const r2 = await apiGetAssets({ limit: 5000 });
-      currentAssets = r2.assets || [];
+      const BACKEND_PAGE_LIMIT = 200;
+      const SAFETY_MAX_PAGES   = 50; // hard ceiling: 50 * 200 = 10,000 assets
+      const first = await apiGetAssets({ page: 1, limit: BACKEND_PAGE_LIMIT });
+      currentAssets = first.assets || [];
+      const totalPages = Math.min(first.pages || 1, SAFETY_MAX_PAGES);
+      if (totalPages > 1) {
+        const rest = await Promise.all(
+          Array.from({ length: totalPages - 1 }, (_, i) =>
+            apiGetAssets({ page: i + 2, limit: BACKEND_PAGE_LIMIT })
+          )
+        );
+        rest.forEach(r => { currentAssets = currentAssets.concat(r.assets || []); });
+      }
     } catch { currentAssets = assets || []; }
     const assetMap = {};
     currentAssets.forEach(a => { assetMap[a.assetId||a.id] = a; });

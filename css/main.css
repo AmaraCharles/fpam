@@ -669,7 +669,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
     box-shadow: var(--shadow-lg);
   }
   #sidebar.open { transform: translateX(0); }
-  .menu-btn { display: flex; }
+  .menu-toggle-btn { display: flex; align-items: center; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .users-grid { grid-template-columns: repeat(2, 1fr); }
   .two-col { grid-template-columns: 1fr; }
@@ -790,7 +790,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   border-radius: 6px; transition: color 0.15s;
 }
 .menu-toggle-btn:hover { color: var(--text); }
-@media (max-width: 768px) { .menu-toggle-btn { display: flex; align-items: center; } }
+@media (max-width: 900px) { .menu-toggle-btn { display: flex; align-items: center; } }
 
 /* Connection status */
 .conn-status {

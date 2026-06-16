@@ -71,6 +71,22 @@ async function renderAssets() {
 }
 
 function renderAssetsTable(list) {
+  // ── STATS BAR ──────────────────────────────────────────────────────────────
+  // Runs unconditionally (even when the filtered list is empty) so the bar
+  // always reflects the current filter, not just the current page.
+  const uniqueStates = [...new Set(filteredAssets.map(a => a.state).filter(Boolean))].sort();
+  const uniqueLgas   = [...new Set(filteredAssets.map(a => a.lga).filter(Boolean))].sort();
+  const goodCount    = filteredAssets.filter(a => a.condition === 'Good').length;
+  const critCount    = filteredAssets.filter(a => a.condition === 'Critical').length;
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('stat-bar-total',    filteredAssets.length);
+  setEl('stat-bar-states',   uniqueStates.length);
+  setEl('stat-bar-lgas',     uniqueLgas.length);
+  setEl('stat-bar-good',     goodCount);
+  setEl('stat-bar-critical', critCount);
+  const listEl = document.getElementById('stat-bar-states-list');
+  if (listEl) listEl.textContent = uniqueStates.length ? uniqueStates.join(' · ') : '';
+
   const total = list.length;
   const totalPages = Math.max(1, Math.ceil(total / ASSETS_PAGE_SIZE));
   if (currentPage > totalPages) currentPage = totalPages;

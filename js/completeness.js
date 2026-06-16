@@ -16,9 +16,24 @@ const COMPLETENESS_FIELDS = [
 ];
 
 async function loadCompletenessData() {
+  // The backend hard-caps any single /assets request at 200 records
+  // (assetService.js listAssets: Math.min(200, limit)), so limit:2000 was
+  // silently only returning the first 200. Page through the full result set.
+  const BACKEND_PAGE_LIMIT = 200;
+  const SAFETY_MAX_PAGES   = 50; // hard ceiling: 50 * 200 = 10,000 assets
   try {
-    const r = await apiGetAssets({ limit: 2000 });
-    return r.assets || [];
+    const first = await apiGetAssets({ page: 1, limit: BACKEND_PAGE_LIMIT });
+    let combined = first.assets || [];
+    const totalPages = Math.min(first.pages || 1, SAFETY_MAX_PAGES);
+    if (totalPages > 1) {
+      const rest = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) =>
+          apiGetAssets({ page: i + 2, limit: BACKEND_PAGE_LIMIT })
+        )
+      );
+      rest.forEach(r => { combined = combined.concat(r.assets || []); });
+    }
+    return combined;
   } catch {
     return assets || [];
   }
