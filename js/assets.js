@@ -87,12 +87,12 @@ async function renderAssets() {
   }
 
   // ── PHOTOS FIRST ─────────────────────────────────────────────────────────
-  // Stable sort (guaranteed since ES2019) — moves assets that have photos to
-  // the top without otherwise disturbing relative order, rather than hiding
-  // assets without photos.
+  // Stable sort (guaranteed since ES2019) — orders by actual photo count
+  // descending, so assets with the most photos lead, down to zero-photo
+  // assets at the bottom, rather than hiding anything.
   if (document.getElementById('filter-photos-first')?.checked) {
-    const hasPhotos = a => (a.photos?.length || a.photoCount || 0) > 0;
-    filteredAssets.sort((a, b) => (hasPhotos(b) ? 1 : 0) - (hasPhotos(a) ? 1 : 0));
+    const photoCount = a => a.photos?.length || a.photoCount || 0;
+    filteredAssets.sort((a, b) => photoCount(b) - photoCount(a));
   }
 
   renderAssetsTable(filteredAssets);
@@ -153,7 +153,7 @@ function renderAssetsTable(list) {
       <td style="font-size:12px;color:var(--text3)">${escHtml(agent)}</td>
       <td>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-xs" onclick='showAssetDetail(${JSON.stringify(a).replace(/'/g,"&#39;")})' title="View detail">
+          <button class="btn btn-ghost btn-xs" onclick="window.location.href='asset-view.html?id='+encodeURIComponent('${id}')" title="View detail">
             <i class="fa-solid fa-eye"></i>
           </button>
           <button class="btn btn-ghost btn-xs" onclick='openEditAsset(${JSON.stringify(a).replace(/'/g,"&#39;")})' title="Edit">

@@ -131,7 +131,7 @@ function renderDashboardRecent(list) {
   tbody.innerHTML = list.map(a => {
     const id = a.assetId || a.id;
     return `
-    <tr onclick="showAssetDetail(window._assetMap['${id}'])" style="cursor:pointer">
+    <tr onclick="window.location.href='asset-view.html?id='+encodeURIComponent('${id}')" style="cursor:pointer">
       <td>${escHtml(a.name || id)}</td>
       <td><span class="tag ${typeColor(a.type)}">${escHtml(a.type)}</span></td>
       <td>${geomIcon(a.geomType || a.geom)} ${escHtml(a.geomType || a.geom || '—')}</td>
@@ -200,7 +200,7 @@ function renderInspectionAlerts(assetList) {
       <td><span class="tag ${overdue ? 'tag-red' : 'tag-warn'}">${overdue
         ? '<i class="fa-solid fa-circle-xmark"></i> OVERDUE ' + Math.abs(daysLeft) + 'd'
         : '<i class="fa-solid fa-clock"></i> ' + daysLeft + 'd'}</span></td>
-      <td><button class="btn btn-primary btn-sm" onclick="showAssetDetail(window._assetMap['${id}'])">
+      <td><button class="btn btn-primary btn-sm" onclick="window.location.href='asset-view.html?id='+encodeURIComponent('${id}')">
         <i class="fa-solid fa-pen"></i> Action</button></td>
     </tr>`;
   }).join('');

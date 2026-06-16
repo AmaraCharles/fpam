@@ -68,17 +68,11 @@ function geomIcon(g) {
   return { Point:'<i class="fa-solid fa-location-dot"></i>', Polygon:'<i class="fa-solid fa-draw-polygon"></i>', Linear:'<i class="fa-solid fa-route"></i>' }[g] || '';
 }
 function timeAgo(ts) {
-  // Accept numeric timestamp, ISO string, or Date object
-  const ms = typeof ts === 'number' ? ts : ts ? new Date(ts).getTime() : null;
-  if (!ms || isNaN(ms)) return '—';
-  const diff = (Date.now() - ms) / 1000;
-  if (diff < 0)     return 'just now';
-  if (diff < 60)    return 'just now';
-  if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-  if (diff < 2592000) return Math.floor(diff / 86400) + 'd ago';
-  if (diff < 31536000) return Math.floor(diff / 2592000) + 'mo ago';
-  return Math.floor(diff / 31536000) + 'y ago';
+  const diff = (Date.now() - ts) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
 }
 function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -304,7 +298,7 @@ function globalSearch(q) {
     group:'Assets', icon:'fa-layer-group',
     title: a.name || a.id,
     sub: a.id + ' · ' + (a.type||'') + ' · ' + (a.condition||''),
-    action: () => { showAssetDetail(a); document.getElementById('global-search-input').value=''; dd.classList.remove('open'); }
+    action: () => { window.location.href = `asset-view.html?id=${encodeURIComponent(a.assetId || a.id)}`; }
   }));
   users.filter(u =>
     (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q)
@@ -363,17 +357,6 @@ function renderUserBadge() {
   if (nameEl) nameEl.textContent = user.name;
   if (roleEl) roleEl.textContent = user.role?.toUpperCase();
   if (initEl) initEl.textContent = initials;
-
-  // Apply custom platform name saved from Settings page
-  const customName = localStorage.getItem('as_platform_name');
-  if (customName) {
-    document.querySelectorAll('.logo-mark').forEach(el => {
-      // Only replace if it still shows the default
-      if (el.textContent === 'AssetSpatial' || el.textContent === el.dataset.default) {
-        el.textContent = customName;
-      }
-    });
-  }
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
