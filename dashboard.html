@@ -679,7 +679,6 @@ table.rt tbody tr:hover { background: rgba(74,144,217,.04); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="js/asset_detail.js"></script>
 <script src="js/dashboard.js"></script>
-<script src="js/notifications.js"></script>
 <script src="js/inspections.js"></script>
 
 <script>
@@ -699,14 +698,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   checkApiHealth();
 
-  document.getElementById('menu-toggle')?.addEventListener('click', () => {
-    document.getElementById('sidebar')?.classList.toggle('open');
-    document.getElementById('sidebar-overlay')?.classList.toggle('open');
-  });
-  document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
-    document.getElementById('sidebar')?.classList.remove('open');
-    document.getElementById('sidebar-overlay')?.classList.remove('open');
-  });
+  // NOTE: menu-toggle / sidebar-overlay click listeners are already registered
+  // globally in app.js's DOMContentLoaded handler — duplicating them here meant
+  // every tap fired both listeners, toggling the sidebar open then immediately
+  // closed again on the same click, making the hamburger appear non-functional.
+
   document.addEventListener('click', e => {
     const w = document.getElementById('global-search-wrap');
     if (w && !w.contains(e.target)) document.getElementById('global-search-dropdown')?.classList.remove('open');

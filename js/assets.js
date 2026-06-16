@@ -6,6 +6,24 @@ let selectedAssetIds = new Set();
 const ASSETS_PAGE_SIZE = 50;  // rows shown per page in the table
 let currentPage = 1;
 
+// Canonical list of Nigeria's 36 states + FCT (matches the #filter-state dropdown).
+// Used to validate the freeform `state` field before it's counted in the stats
+// bar — bulk imports can leave typos, blanks, or non-state text in that column,
+// which previously inflated the "States" count with garbage values.
+const NIGERIA_STATES = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
+  'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','Gombe','Imo','Jigawa','Kaduna',
+  'Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo',
+  'Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara','FCT'];
+
+const _NIGERIA_STATES_LOOKUP = new Map(NIGERIA_STATES.map(s => [s.toLowerCase(), s]));
+
+// Returns the canonical state name if `raw` matches a real Nigerian state
+// (trimmed, case-insensitive), otherwise null so it gets excluded from counts.
+function normalizeNigeriaState(raw) {
+  if (!raw) return null;
+  return _NIGERIA_STATES_LOOKUP.get(String(raw).trim().toLowerCase()) || null;
+}
+
 // The backend hard-caps any single request at 200 records (assetService.js
 // listAssets: Math.min(200, limit)), so a 1000+ asset database needs multiple
 // requests to retrieve in full. This fetches page 1 to learn the total page
@@ -74,7 +92,7 @@ function renderAssetsTable(list) {
   // ── STATS BAR ──────────────────────────────────────────────────────────────
   // Runs unconditionally (even when the filtered list is empty) so the bar
   // always reflects the current filter, not just the current page.
-  const uniqueStates = [...new Set(filteredAssets.map(a => a.state).filter(Boolean))].sort();
+  const uniqueStates = [...new Set(filteredAssets.map(a => normalizeNigeriaState(a.state)).filter(Boolean))].sort();
   const uniqueLgas   = [...new Set(filteredAssets.map(a => a.lga).filter(Boolean))].sort();
   const goodCount    = filteredAssets.filter(a => a.condition === 'Good').length;
   const critCount    = filteredAssets.filter(a => a.condition === 'Critical').length;
