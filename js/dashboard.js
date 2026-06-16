@@ -1,4 +1,28 @@
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
+
+// The backend hard-caps any single /assets request at 200 records
+// (assetService.js listAssets: Math.min(200, limit)), so asking for
+// limit:500 silently only returns 200. This pages through the full
+// result set instead, same approach used in assets.js.
+async function _fetchAllAssetsForDashboard(baseParams = {}) {
+  const BACKEND_PAGE_LIMIT = 200;
+  const SAFETY_MAX_PAGES   = 50; // hard ceiling: 50 * 200 = 10,000 assets
+
+  const first = await apiGetAssets({ ...baseParams, page: 1, limit: BACKEND_PAGE_LIMIT });
+  let combined = first.assets || [];
+  const totalPages = Math.min(first.pages || 1, SAFETY_MAX_PAGES);
+
+  if (totalPages > 1) {
+    const rest = await Promise.all(
+      Array.from({ length: totalPages - 1 }, (_, i) =>
+        apiGetAssets({ ...baseParams, page: i + 2, limit: BACKEND_PAGE_LIMIT })
+      )
+    );
+    rest.forEach(r => { combined = combined.concat(r.assets || []); });
+  }
+  return combined;
+}
+
 async function renderDashboard() {
   // ── KPI stats ──────────────────────────────────────────────────────────────
   // Try the dedicated analytics endpoint first; if it 404s or fails,
@@ -21,9 +45,8 @@ async function renderDashboard() {
     console.warn('[Dashboard] analytics endpoint failed:', e.message, '— computing from assets');
     // Compute directly from the asset list
     try {
-      const r = await apiGetAssets({ limit: 500 });
-      const list = r.assets || [];
-      total      = r.total || list.length;
+      const list = await _fetchAllAssetsForDashboard();
+      total      = list.length;
       active     = list.filter(a => a.status === 'Active').length;
       critical   = list.filter(a => a.condition === 'Critical').length;
       underMaint = list.filter(a => a.status === 'Under Maintenance').length;
@@ -75,20 +98,14 @@ async function renderDashboard() {
     renderActivityFeed([...auditLog].slice(0, 6));
   }
 
-  // ── Inspection alerts ───────────────────────────────────────────────────────
-  try {
-    const r = await apiGetAssets({ limit: 500 });
-    renderInspectionAlerts(r.assets || []);
-  } catch {
-    renderInspectionAlerts(assets);
-  }
-
-  // ── Mini charts — try analytics endpoints, fall back to computing from assets ──
+  // ── Inspection alerts + Mini charts — both need the full asset list ────────
   let allAssetsForCharts = [];
   try {
-    const r = await apiGetAssets({ limit: 500 });
-    allAssetsForCharts = r.assets || [];
-  } catch {}
+    allAssetsForCharts = await _fetchAllAssetsForDashboard();
+  } catch {
+    allAssetsForCharts = [...assets];
+  }
+  renderInspectionAlerts(allAssetsForCharts);
 
   let byTypeData = [], overtimeData = [];
   try {
@@ -114,7 +131,7 @@ function renderDashboardRecent(list) {
   tbody.innerHTML = list.map(a => {
     const id = a.assetId || a.id;
     return `
-    <tr onclick="window.location.href='asset-view.html?id=${id}'" style="cursor:pointer">
+    <tr onclick="showAssetDetail(window._assetMap['${id}'])" style="cursor:pointer">
       <td>${escHtml(a.name || id)}</td>
       <td><span class="tag ${typeColor(a.type)}">${escHtml(a.type)}</span></td>
       <td>${geomIcon(a.geomType || a.geom)} ${escHtml(a.geomType || a.geom || '—')}</td>
@@ -183,8 +200,8 @@ function renderInspectionAlerts(assetList) {
       <td><span class="tag ${overdue ? 'tag-red' : 'tag-warn'}">${overdue
         ? '<i class="fa-solid fa-circle-xmark"></i> OVERDUE ' + Math.abs(daysLeft) + 'd'
         : '<i class="fa-solid fa-clock"></i> ' + daysLeft + 'd'}</span></td>
-      <td><button class="btn btn-primary btn-sm" onclick="window.location.href='asset-view.html?id=${id}'">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i> View</button></td>
+      <td><button class="btn btn-primary btn-sm" onclick="showAssetDetail(window._assetMap['${id}'])">
+        <i class="fa-solid fa-pen"></i> Action</button></td>
     </tr>`;
   }).join('');
 }

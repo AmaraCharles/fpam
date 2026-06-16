@@ -1,8 +1,36 @@
 // ── ASSET REGISTRY ──────────────────────────────────────────────────────────
-let filteredAssets = [];
+let allAssets = [];        // full result set for the current filter (across all backend pages)
+let filteredAssets = [];   // allAssets after client-side search/geom/mda filtering
 let selectedAssetIds = new Set();
 
+const ASSETS_PAGE_SIZE = 50;  // rows shown per page in the table
+let currentPage = 1;
+
+// The backend hard-caps any single request at 200 records (assetService.js
+// listAssets: Math.min(200, limit)), so a 1000+ asset database needs multiple
+// requests to retrieve in full. This fetches page 1 to learn the total page
+// count, then fires the remaining pages in parallel.
+async function fetchAllAssets(baseParams = {}) {
+  const BACKEND_PAGE_LIMIT = 200;
+  const SAFETY_MAX_PAGES   = 50; // hard ceiling: 50 * 200 = 10,000 assets
+
+  const first = await apiGetAssets({ ...baseParams, page: 1, limit: BACKEND_PAGE_LIMIT });
+  let combined = first.assets || [];
+  const totalPages = Math.min(first.pages || 1, SAFETY_MAX_PAGES);
+
+  if (totalPages > 1) {
+    const rest = await Promise.all(
+      Array.from({ length: totalPages - 1 }, (_, i) =>
+        apiGetAssets({ ...baseParams, page: i + 2, limit: BACKEND_PAGE_LIMIT })
+      )
+    );
+    rest.forEach(r => { combined = combined.concat(r.assets || []); });
+  }
+  return combined;
+}
+
 async function renderAssets() {
+  currentPage = 1;
   try {
     const q = document.getElementById('search-input')?.value.trim() || '';
     const type = document.getElementById('filter-type')?.value || '';
@@ -12,8 +40,8 @@ async function renderAssets() {
     const params = {};
     if (type) params.type      = type;
     if (cond) params.condition = cond;
-    const r = await apiGetAssets(params);
-    filteredAssets = r.assets || [];
+    allAssets = await fetchAllAssets(params);
+    filteredAssets = [...allAssets];
     if (q) filteredAssets = filteredAssets.filter(a =>
       (a.name||'').toLowerCase().includes(q.toLowerCase()) ||
       (a.assetId||'').toLowerCase().includes(q.toLowerCase()) ||
@@ -23,7 +51,8 @@ async function renderAssets() {
     if (mda)  filteredAssets = filteredAssets.filter(a => a.mda === mda);
   } catch {
     // Offline fallback
-    filteredAssets = [...assets];
+    allAssets = [...assets];
+    filteredAssets = [...allAssets];
     const q = document.getElementById('search-input')?.value.trim().toLowerCase() || '';
     const type = document.getElementById('filter-type')?.value || '';
     const cond = document.getElementById('filter-cond')?.value || '';
@@ -39,89 +68,48 @@ async function renderAssets() {
     if (mda)  filteredAssets = filteredAssets.filter(a => a.mda === mda);
   }
   renderAssetsTable(filteredAssets);
-
-  // ── Stats summary bar ──────────────────────────────────────────────────────
-  const uniqueStates = [...new Set(filteredAssets.map(a => a.state).filter(Boolean))].sort();
-  const uniqueLgas   = [...new Set(filteredAssets.map(a => a.lga).filter(Boolean))].sort();
-  const goodCount    = filteredAssets.filter(a => a.condition === 'Good').length;
-  const critCount    = filteredAssets.filter(a => a.condition === 'Critical').length;
-  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  setEl('stat-bar-total',    filteredAssets.length);
-  setEl('stat-bar-states',   uniqueStates.length);
-  setEl('stat-bar-lgas',     uniqueLgas.length);
-  setEl('stat-bar-good',     goodCount);
-  setEl('stat-bar-critical', critCount);
-  const listEl = document.getElementById('stat-bar-states-list');
-  if (listEl) listEl.textContent = uniqueStates.length ? uniqueStates.join(' · ') : '';
-
-  // Handle ?highlight= or ?q= URL params on first load
-  const params = new URLSearchParams(location.search);
-  const highlight = params.get('highlight');
-  const qParam    = params.get('q');
-  if (highlight) {
-    const row = document.querySelector(`[data-id="${highlight}"]`)?.closest('tr');
-    if (row) {
-      row.style.background = 'rgba(74,144,217,.1)';
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => row.style.background = '', 2500);
-    }
-  }
-  if (qParam) {
-    const si = document.getElementById('search-input');
-    if (si) { si.value = qParam; renderAssets(); }
-  }
 }
 
 function renderAssetsTable(list) {
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / ASSETS_PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * ASSETS_PAGE_SIZE;
+  const pageItems = list.slice(start, start + ASSETS_PAGE_SIZE);
+
   const tbody = document.getElementById('assets-tbody');
-  if (!list.length) {
+  if (!total) {
     tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
       <div class="empty-icon"><i class="fa-solid fa-layer-group"></i></div>
       <div class="empty-title">No assets found</div>
       <div class="empty-sub">Adjust filters or capture a new asset</div>
     </div></td></tr>`;
+    renderAssetsPagination(0, 0, 0);
     return;
   }
 
-  tbody.innerHTML = list.map(a => {
+  tbody.innerHTML = pageItems.map(a => {
     const id = a.assetId || a.id;
     const geom = a.geomType || a.geom || '—';
     const lat = a.lat || a.location?.coordinates?.[1] || '—';
     const lng = a.lng || a.location?.coordinates?.[0] || '—';
     const agent = a.agent || a.capturedBy?.name || '—';
     const mda   = a.mda || '—';
-    return `<tr style="cursor:pointer" onclick="openAssetView('${id}', event)">
+    return `<tr>
       <td style="width:36px"><input type="checkbox" class="asset-row-check" data-id="${id}" onchange="onAssetRowCheck()" ${selectedAssetIds.has(id)?'checked':''}></td>
-      <td style="font-family:'Courier New',monospace;font-size:10px;color:var(--text3)">
-        ${a.assetCode
-          ? `<div style="font-weight:700;color:var(--text);letter-spacing:.3px;margin-bottom:2px">
-               ${escHtml(a.assetCode)}
-               ${a.assetCode.includes('-001-')
-                 ? '<span style="font-size:9px;background:rgba(45,184,123,.15);color:#0f7a4d;padding:1px 6px;border-radius:10px;margin-left:4px;font-family:\'DM Sans\',sans-serif;font-weight:700">HQ</span>'
-                 : ''}
-             </div>
-             <div style="font-size:9px;color:var(--text3)">${escHtml(id)}</div>`
-          : escHtml(id)
-        }
-      </td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">${escHtml(id)}</td>
       <td><strong>${escHtml(a.name)}</strong></td>
       <td><span class="tag ${typeColor(a.type)}">${escHtml(a.type)}</span></td>
       <td>${geomIcon(geom)} <span style="font-size:11px;color:var(--text3);margin-left:2px">${geom}</span></td>
       <td><span class="tag ${condColor(a.condition)}">${escHtml(a.condition)}</span></td>
-      <td style="font-size:12px;color:var(--text2)">
-        <div style="font-weight:500">${escHtml(a.state||'—')}</div>
-        ${a.lga ? `<div style="font-size:10px;color:var(--text3);margin-top:1px">${escHtml(a.lga)}</div>` : ''}
-      </td>
-      <td>
-        <span class="tag ${a.assessed === 'Assessed' ? 'tag-green' : 'tag-orange'}" style="font-size:10px">
-          ${a.assessed === 'Assessed' ? '<i class="fa-solid fa-circle-check" style="font-size:9px"></i> Assessed' : '<i class="fa-solid fa-circle-question" style="font-size:9px"></i> Unassessed'}
-        </span>
-      </td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">${typeof lat==='number'?lat.toFixed(4):lat}, ${typeof lng==='number'?lng.toFixed(4):lng}</td>
+      <td style="font-size:12px;color:var(--text2)">${escHtml(a.state||'—')}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(mda)}">${escHtml(mda)}</td>
       <td>${typeof calcRiskScore !== 'undefined' ? riskBadge(calcRiskScore(a)) : ''}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3)">${escHtml(agent)}</td>
-      <td onclick="event.stopPropagation()">
+      <td style="font-size:12px;color:var(--text3)">${escHtml(agent)}</td>
+      <td>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-xs" onclick="openAssetView('${id}')" title="View detail">
+          <button class="btn btn-ghost btn-xs" onclick='showAssetDetail(${JSON.stringify(a).replace(/'/g,"&#39;")})' title="View detail">
             <i class="fa-solid fa-eye"></i>
           </button>
           <button class="btn btn-ghost btn-xs" onclick='openEditAsset(${JSON.stringify(a).replace(/'/g,"&#39;")})' title="Edit">
@@ -134,17 +122,48 @@ function renderAssetsTable(list) {
       </td>
     </tr>`;
   }).join('');
+
+  renderAssetsPagination(start + 1, Math.min(start + ASSETS_PAGE_SIZE, total), total);
 }
 
-// Navigate to asset-view page — skips row click if user clicked checkbox or action buttons
-function openAssetView(id, event) {
-  if (event) {
-    // Don't navigate if the click was on a checkbox, button, or input
-    const tag = event.target.tagName;
-    if (tag === 'INPUT' || tag === 'BUTTON' || event.target.closest('button') || event.target.closest('input')) return;
+// ── PAGINATION CONTROLS ───────────────────────────────────────────────────────
+function renderAssetsPagination(from, to, total) {
+  const info  = document.getElementById('page-info');
+  const pager = document.getElementById('pagination');
+  if (info) info.textContent = total ? `Showing ${from}–${to} of ${total} assets` : 'Showing 0 assets';
+  if (!pager) return;
+
+  const totalPages = Math.max(1, Math.ceil(total / ASSETS_PAGE_SIZE));
+  if (totalPages <= 1) { pager.innerHTML = ''; return; }
+
+  const pageBtn = (label, page, disabled, active) =>
+    `<button class="btn btn-ghost btn-xs" style="${active ? 'background:var(--blue,#4A90D9);color:#fff;' : ''}" ${disabled ? 'disabled' : ''} onclick="goToAssetsPage(${page})">${label}</button>`;
+
+  let html = pageBtn('<i class="fa-solid fa-angle-left"></i>', currentPage - 1, currentPage === 1, false);
+
+  const window_ = 1;
+  const pagesToShow = new Set([1, totalPages]);
+  for (let p = currentPage - window_; p <= currentPage + window_; p++) {
+    if (p >= 1 && p <= totalPages) pagesToShow.add(p);
   }
-  window.location.href = `asset-view.html?id=${encodeURIComponent(id)}`;
+  let prev = 0;
+  [...pagesToShow].sort((a, b) => a - b).forEach(p => {
+    if (p - prev > 1) html += `<span style="padding:0 6px;color:var(--text3)">…</span>`;
+    html += pageBtn(String(p), p, false, p === currentPage);
+    prev = p;
+  });
+
+  html += pageBtn('<i class="fa-solid fa-angle-right"></i>', currentPage + 1, currentPage === totalPages, false);
+  pager.innerHTML = html;
 }
+
+function goToAssetsPage(p) {
+  const totalPages = Math.max(1, Math.ceil(filteredAssets.length / ASSETS_PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, p), totalPages);
+  renderAssetsTable(filteredAssets);
+}
+
+function filterAssets() { renderAssets(); }
 function clearFilters() {
   ['search-input','filter-type','filter-cond','filter-geom','filter-state','filter-mda'].forEach(id => {
     const el = document.getElementById(id);
@@ -153,6 +172,7 @@ function clearFilters() {
   renderAssets();
 }
 
+// ── ASSET DETAIL ──────────────────────────────────────────────────────────────
 // ── DELETE ────────────────────────────────────────────────────────────────────
 async function deleteAsset(id) {
   if (!confirm(`Delete asset ${id}? This cannot be undone.`)) return;
@@ -171,67 +191,23 @@ async function deleteAsset(id) {
 
 // ── EDIT ──────────────────────────────────────────────────────────────────────
 function openEditAsset(a) {
-  const id  = a.assetId || a.id;
-  const lat = a.lat ?? a.location?.coordinates?.[1] ?? '';
-  const lng = a.lng ?? a.location?.coordinates?.[0] ?? '';
-  const capDate = (a.captureDate || a.date || '').toString().slice(0, 10);
-
-  const SECTORS = [
-    '', 'Administration & Governance', 'Defence & Security', 'Education', 'Health',
-    'Infrastructure & Works', 'Energy & Power', 'Agriculture & Food Security',
-    'Water Resources', 'Transportation', 'Finance & Economy', 'Justice & Legal Affairs',
-    'Environment', 'Communications & Digital', 'Social Development', 'Science & Technology',
-    'Trade & Investment', 'Petroleum & Mineral Resources', 'Labour & Employment',
-    'Foreign Affairs', 'Culture, Tourism & Sports',
-  ];
-
+  const id = a.assetId || a.id;
   openModal('Edit Asset',
     `<div class="form-grid">
-      <input type="hidden" id="edit-prev-condition" value="${escHtml(a.condition||'')}">
-
-      <div class="form-group full"><label class="form-label">Name</label>
-        <input class="form-control" id="edit-name" value="${escHtml(a.name)}"></div>
-
+      <div class="form-group full"><label class="form-label">Name</label><input class="form-control" id="edit-name" value="${escHtml(a.name)}"></div>
       <div class="form-group"><label class="form-label">Condition</label>
         <select class="form-control" id="edit-cond">
-          <option value="" ${!a.condition ? 'selected' : ''}>— Unassessed —</option>
-          ${['Good','Fair','Poor','Critical'].map(c => `<option ${a.condition===c?'selected':''}>${c}</option>`).join('')}
+          ${['Good','Fair','Poor','Critical'].map(c=>`<option ${a.condition===c?'selected':''}>${c}</option>`).join('')}
         </select></div>
-
-      <div class="form-group"><label class="form-label">Assessment Status</label>
-        <select class="form-control" id="edit-assessed">
-          <option value="Unassessed" ${(a.assessed||'Unassessed')==='Unassessed'?'selected':''}>Unassessed</option>
-          <option value="Assessed"   ${a.assessed==='Assessed'?'selected':''}>Assessed</option>
-        </select></div>
-
       <div class="form-group"><label class="form-label">Status</label>
         <select class="form-control" id="edit-status">
-          ${['Active','Under Maintenance','Decommissioned','Disputed','Recovered'].map(s => `<option ${(a.status||'Active')===s?'selected':''}>${s}</option>`).join('')}
+          ${['Active','Under Maintenance','Decommissioned','Disputed','Recovered'].map(s=>`<option ${(a.status||'Active')===s?'selected':''}>${s}</option>`).join('')}
         </select></div>
-
       <div class="form-group full"><label class="form-label">MDA / Agency</label>
         <select class="form-control" id="edit-mda"><option value="">— Select MDA —</option></select></div>
-
-      <div class="form-group full"><label class="form-label">Sector</label>
-        <select class="form-control" id="edit-sector">
-          ${SECTORS.map(s => `<option value="${escHtml(s)}" ${(a.sector||'')=== s?'selected':''}>${s || '— Select Sector —'}</option>`).join('')}
-        </select></div>
-
-      <div class="form-group"><label class="form-label">State</label>
-        <input class="form-control" id="edit-state" value="${escHtml(a.state||'')}"></div>
-      <div class="form-group"><label class="form-label">LGA</label>
-        <input class="form-control" id="edit-lga" value="${escHtml(a.lga||'')}"></div>
-
-      <div class="form-group"><label class="form-label">Latitude</label>
-        <input class="form-control" id="edit-lat" type="number" step="any" placeholder="e.g. 9.0765" value="${lat}"></div>
-      <div class="form-group"><label class="form-label">Longitude</label>
-        <input class="form-control" id="edit-lng" type="number" step="any" placeholder="e.g. 7.3986" value="${lng}"></div>
-
-      <div class="form-group"><label class="form-label">Capture Date</label>
-        <input class="form-control" id="edit-capture-date" type="date" value="${escHtml(capDate)}"></div>
-
-      <div class="form-group full"><label class="form-label">Notes</label>
-        <textarea class="form-control" id="edit-notes">${escHtml(a.notes||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">State</label><input class="form-control" id="edit-state" value="${escHtml(a.state||'')}"></div>
+      <div class="form-group"><label class="form-label">LGA</label><input class="form-control" id="edit-lga" value="${escHtml(a.lga||'')}"></div>
+      <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-control" id="edit-notes">${escHtml(a.notes||'')}</textarea></div>
     </div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
      <button class="btn btn-primary" onclick="saveEditedAsset('${id}')"><i class="fa-solid fa-save"></i> Save Changes</button>`
@@ -240,28 +216,14 @@ function openEditAsset(a) {
 }
 
 async function saveEditedAsset(id) {
-  const latVal = document.getElementById('edit-lat')?.value;
-  const lngVal = document.getElementById('edit-lng')?.value;
-  const lat    = parseFloat(latVal);
-  const lng    = parseFloat(lngVal);
-  const capDateVal = document.getElementById('edit-capture-date')?.value;
-
   const data = {
-    name:              document.getElementById('edit-name')?.value.trim(),
-    condition:         document.getElementById('edit-cond')?.value || null,
-    previousCondition: document.getElementById('edit-prev-condition')?.value || '',
-    assessed:          document.getElementById('edit-assessed')?.value,
-    status:            document.getElementById('edit-status')?.value,
-    mda:               document.getElementById('edit-mda')?.value || '',
-    sector:            document.getElementById('edit-sector')?.value || '',
-    state:             document.getElementById('edit-state')?.value,
-    lga:               document.getElementById('edit-lga')?.value,
-    notes:             document.getElementById('edit-notes')?.value,
-    ...(capDateVal ? { captureDate: capDateVal } : {}),
-    ...(!isNaN(lat) && !isNaN(lng) && latVal !== '' && lngVal !== '' ? {
-      lat, lng,
-      location: { type: 'Point', coordinates: [lng, lat] },
-    } : {}),
+    name:      document.getElementById('edit-name')?.value.trim(),
+    condition: document.getElementById('edit-cond')?.value,
+    status:    document.getElementById('edit-status')?.value,
+    mda:       document.getElementById('edit-mda')?.value || '',
+    state:     document.getElementById('edit-state')?.value,
+    lga:       document.getElementById('edit-lga')?.value,
+    notes:     document.getElementById('edit-notes')?.value,
   };
   try {
     await apiUpdateAsset(id, data);
@@ -339,6 +301,7 @@ function sortBy(field) {
     if (typeof va === 'number') return (va - vb) * _sortDir;
     return String(va).localeCompare(String(vb)) * _sortDir;
   });
+  currentPage = 1;
   renderAssetsTable(filteredAssets);
 }
 

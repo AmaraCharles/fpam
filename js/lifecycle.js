@@ -2,6 +2,12 @@
 // Stored as { parentId, childIds[] } in localStorage under 'as_relationships'
 // and optionally synced to a backend field. Non-destructive — works alongside
 // the existing asset model.
+//
+// NOTE: This file merges what used to be two separate scripts
+// (asset_enhancements.js + lifecycle.js). Both declared the same globals
+// (REL_KEY, linkAssets, renderRelationshipsTab, etc.), which throws
+// "Identifier has already been declared" as soon as both are loaded on the
+// same page. Only include THIS file — do not also include asset_enhancements.js.
 
 const REL_KEY = 'as_relationships';
 
@@ -39,34 +45,60 @@ function getParent(assetId) {
 }
 
 // ── RELATIONSHIPS TAB RENDERER ────────────────────────────────────────────────
-// Called from asset_detail.js or asset-view.html to render the relationships UI.
+// Renders immediately from localStorage, then enriches with asset names
+// fetched from the API in the background. Only fetches the specific parent/
+// child IDs needed (not the whole asset collection).
 async function renderRelationshipsTab(assetId, containerEl) {
+  if (!containerEl) containerEl = document.getElementById('relationships-panel-content');
   if (!containerEl) return;
 
-  const allAssets = await _getAllAssets();
-  const assetMap  = {};
-  allAssets.forEach(a => { assetMap[a.assetId||a.id] = a; });
-
+  // ── Step 1: Render immediately with IDs only (no API wait) ────────────────
   const children = getChildren(assetId);
   const parentId = getParent(assetId);
-  const parent   = parentId ? assetMap[parentId] : null;
+  _renderRelUI(assetId, containerEl, children, parentId, {});
+
+  // ── Step 2: Fetch asset details in background, re-render with names ───────
+  if (!children.length && !parentId) return; // nothing to enrich
+  try {
+    const ids = [...children, ...(parentId ? [parentId] : [])];
+    // Fetch each asset — use Promise.allSettled so one 404 doesn't block others
+    const results = await Promise.allSettled(
+      ids.map(id => apiGetAsset(id).catch(() => null))
+    );
+    const assetMap = {};
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled' && r.value) {
+        const a = r.value.asset || r.value;
+        assetMap[a.assetId || a.id || ids[i]] = a;
+      }
+    });
+    _renderRelUI(assetId, containerEl, children, parentId, assetMap);
+  } catch {}
+}
+
+function _renderRelUI(assetId, containerEl, children, parentId, assetMap) {
+  const parent = parentId ? (assetMap[parentId] || null) : null;
 
   containerEl.innerHTML = `
     <!-- Parent -->
     <div style="margin-bottom:20px">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:10px">Parent Asset</div>
-      ${parent
-        ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
-            <i class="fa-solid fa-sitemap" style="color:var(--accent);font-size:14px"></i>
+      ${parentId
+        ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2,var(--bg));border:1px solid var(--border);border-radius:8px">
+            <i class="fa-solid fa-sitemap" style="color:var(--blue,#4A90D9);font-size:14px"></i>
             <div style="flex:1">
-              <div style="font-weight:600;font-size:13px">${escHtml(parent.name||parentId)}</div>
-              <div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace">${parentId}</div>
+              <div style="font-weight:600;font-size:13px">${escHtml(parent?.name || parentId)}</div>
+              <div style="font-size:10px;color:var(--text3);font-family:'Courier New',monospace">${escHtml(parentId)}</div>
             </div>
-            <button class="btn btn-ghost btn-xs" onclick="unlinkAssets('${parentId}','${assetId}');renderRelationshipsTab('${assetId}',this.closest('[id]'))">
+            <button class="btn btn-ghost btn-xs" onclick="_doUnlinkParent('${assetId}','${parentId}')">
               <i class="fa-solid fa-unlink"></i> Unlink
             </button>
           </div>`
-        : `<div style="font-size:12px;color:var(--text3);padding:10px 0">No parent asset linked.</div>`}
+        : `<div style="font-size:12px;color:var(--text3);padding:10px 0">No parent asset linked.
+            <button class="btn btn-ghost btn-xs" style="margin-left:10px" onclick="openLinkParentModal('${assetId}')">
+              <i class="fa-solid fa-link"></i> Link Parent
+            </button>
+          </div>`}
     </div>
 
     <!-- Children -->
@@ -82,14 +114,16 @@ async function renderRelationshipsTab(assetId, containerEl) {
       ${children.length
         ? children.map(cid => {
             const child = assetMap[cid];
-            if (!child) return `<div style="font-size:11px;color:var(--text3);padding:6px 0">${cid} (not found)</div>`;
-            return `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
-              <i class="fa-solid fa-arrow-turn-down-right" style="color:var(--accent);font-size:12px"></i>
+            return `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--surface2,var(--bg));border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
+              <i class="fa-solid fa-arrow-turn-down-right" style="color:var(--blue,#4A90D9);font-size:12px"></i>
               <div style="flex:1">
-                <div style="font-weight:600;font-size:13px">${escHtml(child.name||cid)}</div>
-                <div style="font-size:10px;color:var(--text3)">${cid} · ${child.type||'—'} · <span style="color:${child.condition==='Critical'?'#e05555':child.condition==='Good'?'#2DB87B':'#f0a500'}">${child.condition||'Unassessed'}</span></div>
+                <div style="font-weight:600;font-size:13px">${escHtml(child?.name || cid)}</div>
+                <div style="font-size:10px;color:var(--text3)">
+                  <span style="font-family:'Courier New',monospace">${escHtml(cid)}</span>
+                  ${child ? ` · ${escHtml(child.type||'—')} · <span style="color:${child.condition==='Critical'?'#e05555':child.condition==='Good'?'#2DB87B':'#f0a500'}">${child.condition||'Unassessed'}</span>` : ''}
+                </div>
               </div>
-              <button class="btn btn-ghost btn-xs" onclick="unlinkAssets('${assetId}','${cid}');renderRelationshipsTab('${assetId}',this.closest('[data-rel]'))">
+              <button class="btn btn-ghost btn-xs" onclick="_doUnlinkChild('${assetId}','${cid}')">
                 <i class="fa-solid fa-unlink"></i>
               </button>
             </div>`;
@@ -98,28 +132,45 @@ async function renderRelationshipsTab(assetId, containerEl) {
     </div>
 
     <!-- Roll-up summary -->
-    ${children.length ? `
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+    ${children.length && Object.keys(assetMap).length ? `
+    <div style="background:var(--surface2,var(--bg));border:1px solid var(--border);border-radius:8px;padding:14px">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:8px">Portfolio Roll-up</div>
       ${_buildRollup(children.map(cid => assetMap[cid]).filter(Boolean))}
     </div>` : ''}`;
 }
 
-function _buildRollup(children) {
-  if (!children.length) return '';
-  const conds = { Good:0, Fair:0, Poor:0, Critical:0, Unassessed:0 };
-  children.forEach(a => { conds[a.condition||'Unassessed']++; });
-  const totalVal = children.reduce((s,a)=>s+(a.valuation?.amount||0),0);
-  const worstCond = ['Critical','Poor','Fair','Good','Unassessed'].find(c=>conds[c]>0);
-  return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center">
-    ${Object.entries(conds).map(([c,n])=>`
-      <div style="font-size:11px">
-        <div style="font-weight:700;font-size:16px;color:${c==='Good'?'#2DB87B':c==='Critical'?'#e05555':c==='Poor'?'#f07000':c==='Fair'?'#f0a500':'#5A6A7A'}">${n}</div>
-        <div style="color:var(--text3)">${c}</div>
-      </div>`).join('')}
-  </div>
-  ${totalVal ? `<div style="margin-top:8px;font-size:12px;color:var(--text2)">Combined Value: <strong>${totalVal>=1e9?(totalVal/1e9).toFixed(1)+'B':totalVal>=1e6?(totalVal/1e6).toFixed(1)+'M':'₦'+totalVal.toLocaleString()}</strong></div>` : ''}
-  <div style="margin-top:6px;font-size:12px;color:var(--text2)">Worst Condition: <strong style="color:${worstCond==='Good'?'#2DB87B':worstCond==='Critical'?'#e05555':'#f0a500'}">${worstCond}</strong></div>`;
+function _doUnlinkChild(parentId, childId) {
+  unlinkAssets(parentId, childId);
+  if (typeof toast === 'function') toast('Child unlinked', 'fa-unlink');
+  const el = document.getElementById('relationships-panel-content');
+  if (el) renderRelationshipsTab(parentId, el);
+}
+
+function _doUnlinkParent(assetId, parentId) {
+  unlinkAssets(parentId, assetId);
+  if (typeof toast === 'function') toast('Parent unlinked', 'fa-unlink');
+  const el = document.getElementById('relationships-panel-content');
+  if (el) renderRelationshipsTab(assetId, el);
+}
+
+function openLinkParentModal(assetId) {
+  _miniModal('Link Parent Asset',
+    `<div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;color:var(--text2,#2C3E50)">Parent Asset ID</label>
+      <input id="link-parent-id" placeholder="e.g. AST-1001"
+        style="width:100%;padding:9px 13px;border:1px solid var(--border,#E8ECF0);border-radius:8px;font-family:var(--font,'DM Sans',sans-serif);font-size:13px;color:var(--text,#0B1829);background:var(--bg,#F4F6F9);outline:none">
+      <div style="font-size:11px;color:var(--text3,#5A6A7A);margin-top:5px">Enter the ID of the asset that contains this one</div>
+    </div>`,
+    () => {
+      const parentId = document.getElementById('link-parent-id')?.value.trim();
+      if (!parentId) return;
+      linkAssets(parentId, assetId);
+      if (typeof toast === 'function') toast(`Linked under ${parentId}`, 'fa-link');
+      if (typeof addAudit === 'function') addAudit('ASSET_LINKED', assetId, null, `Linked under ${parentId}`);
+      const el = document.getElementById('relationships-panel-content');
+      if (el) renderRelationshipsTab(assetId, el);
+    }
+  );
 }
 
 function openLinkChildModal(parentId) {
@@ -138,16 +189,27 @@ function _doLinkChild(parentId) {
   const childId = document.getElementById('link-child-id')?.value.trim();
   if (!childId) return;
   linkAssets(parentId, childId);
-  if(typeof toast==='function') toast(`Linked ${childId} as child of ${parentId}`, 'fa-link');
-  if(typeof closeModal==='function') closeModal();
-  if(typeof addAudit==='function') addAudit('ASSET_LINKED', parentId, null, `${childId} linked as child`);
+  if (typeof toast === 'function') toast(`Linked ${childId} as child of ${parentId}`, 'fa-link');
+  if (typeof addAudit === 'function') addAudit('ASSET_LINKED', parentId, null, `${childId} linked as child`);
+  const el = document.getElementById('relationships-panel-content');
+  if (el) renderRelationshipsTab(parentId, el);
 }
 
-async function _getAllAssets() {
-  try {
-    const r = await apiGetAssets({ limit: 5000 });
-    return r.assets || [];
-  } catch { return assets || []; }
+function _buildRollup(children) {
+  if (!children.length) return '';
+  const conds = { Good:0, Fair:0, Poor:0, Critical:0, Unassessed:0 };
+  children.forEach(a => { conds[a.condition||'Unassessed']++; });
+  const totalVal = children.reduce((s,a)=>s+(a.valuation?.amount||0),0);
+  const worstCond = ['Critical','Poor','Fair','Good','Unassessed'].find(c=>conds[c]>0);
+  return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center">
+    ${Object.entries(conds).map(([c,n])=>`
+      <div style="font-size:11px">
+        <div style="font-weight:700;font-size:16px;color:${c==='Good'?'#2DB87B':c==='Critical'?'#e05555':c==='Poor'?'#f07000':c==='Fair'?'#f0a500':'#5A6A7A'}">${n}</div>
+        <div style="color:var(--text3)">${c}</div>
+      </div>`).join('')}
+  </div>
+  ${totalVal ? `<div style="margin-top:8px;font-size:12px;color:var(--text2)">Combined Value: <strong>${totalVal>=1e9?(totalVal/1e9).toFixed(1)+'B':totalVal>=1e6?(totalVal/1e6).toFixed(1)+'M':'₦'+totalVal.toLocaleString()}</strong></div>` : ''}
+  <div style="margin-top:6px;font-size:12px;color:var(--text2)">Worst Condition: <strong style="color:${worstCond==='Good'?'#2DB87B':worstCond==='Critical'?'#e05555':'#f0a500'}">${worstCond}</strong></div>`;
 }
 
 // ── ENHANCED FULL-TEXT SEARCH ─────────────────────────────────────────────────
