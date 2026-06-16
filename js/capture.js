@@ -39,14 +39,6 @@ const TYPE_FIELDS = {
     { label:'Power / Output',   id:'ts-eq-power',   type:'text',   ph:'e.g. 150kW' },
     { label:'Next Maintenance', id:'ts-eq-next',    type:'date' },
   ],
-  'Monument': [
-    { label:'Monument Type',    id:'ts-mon-type',   type:'select', opts:['War Memorial','Statue','Heritage Site','Plaque','Cultural Site','Historical Building','National Park Feature'] },
-    { label:'Year Erected',     id:'ts-mon-year',   type:'number', ph:'e.g. 1960' },
-    { label:'Dedicated To',     id:'ts-mon-ded',    type:'text',   ph:'Person, event or occasion' },
-    { label:'Heritage Status',  id:'ts-mon-her',    type:'select', opts:['National Heritage','State Heritage','Local Heritage','Proposed','Undesignated'] },
-    { label:'Managing Authority',id:'ts-mon-auth',  type:'text',   ph:'e.g. NCMM, NICON' },
-    { label:'Public Access',    id:'ts-mon-acc',    type:'select', opts:['Open','Restricted','Closed','Seasonal'] },
-  ],
 };
 
 async function initCaptureForm() {
@@ -57,12 +49,6 @@ async function initCaptureForm() {
 
   // Populate MDA dropdown
   await populateMdaSelect('cap-mda');
-
-  // Wire up live code preview on field changes
-  ['cap-mda', 'cap-type', 'cap-state', 'cap-date'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', updateCodePreview);
-  });
-  updateCodePreview();
 
   // Check for OCR suggestions from scanner
   const sugg = sessionStorage.getItem('ocr_suggestions');
@@ -83,52 +69,6 @@ async function initCaptureForm() {
   }
 
   loadRecentCaptures();
-}
-
-// ── Live asset code preview ────────────────────────────────────────────────────
-function updateCodePreview() {
-  const previewEl = document.getElementById('cap-code-preview');
-  if (!previewEl) return;
-
-  const mda   = document.getElementById('cap-mda')?.value   || '';
-  const type  = document.getElementById('cap-type')?.value  || '';
-  const state = document.getElementById('cap-state')?.value || '';
-  const date  = document.getElementById('cap-date')?.value  || '';
-
-  if (!mda && !type && !state) {
-    previewEl.textContent = 'Fill MDA, Type and State to preview code…';
-    previewEl.style.color = 'var(--text3)';
-    return;
-  }
-
-  // Use AssetCodeIndex if available (loaded as a script), else build manually
-  let code;
-  if (window.AssetCodeIndex) {
-    const year = date ? new Date(date).getFullYear() : new Date().getFullYear();
-    code = window.AssetCodeIndex.buildAssetCode({ mda, type, state, year, seq: 'XXXX' });
-  } else {
-    const typeMap = { 'Infrastructure':'INF','Land / Property':'LND','Utility':'UTL',
-                      'Environmental':'ENV','Equipment':'EQP','Monument':'MON' };
-    const branchMap = { 'FCT':'001','Abia':'002','Adamawa':'003','Akwa Ibom':'004','Anambra':'005',
-      'Bauchi':'006','Bayelsa':'007','Benue':'008','Borno':'009','Cross River':'010','Delta':'011',
-      'Ebonyi':'012','Edo':'013','Ekiti':'014','Enugu':'015','Gombe':'016','Imo':'017','Jigawa':'018',
-      'Kaduna':'019','Kano':'020','Katsina':'021','Kebbi':'022','Kogi':'023','Kwara':'024','Lagos':'025',
-      'Nasarawa':'026','Niger':'027','Ogun':'028','Ondo':'029','Osun':'030','Oyo':'031','Plateau':'032',
-      'Rivers':'033','Sokoto':'034','Taraba':'035','Yobe':'036','Zamfara':'037' };
-    const mdaCode  = mda ? mda.replace(/Federal Ministry of|Ministry of|Department of/gi,'').trim()
-                              .split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,6) || 'FGN' : 'FGN';
-    const typeCode = typeMap[type] || 'UNK';
-    const branch   = branchMap[state] || '000';
-    const year     = date ? new Date(date).getFullYear() : new Date().getFullYear();
-    code = `FGN-${mdaCode}-${typeCode}-${branch}-${year}-XXXX`;
-  }
-
-  const isHQ = code.includes('-001-');
-  previewEl.textContent = code;
-  previewEl.style.color = isHQ ? 'var(--success)' : 'var(--blue)';
-  const hqBadge = document.getElementById('cap-code-hq-badge');
-  if (hqBadge) hqBadge.style.display = isHQ ? '' : 'none';
-  previewEl.title = isHQ ? '✓ HQ Asset — branch 001 indicates a headquarters asset' : '';
 }
 
 function renderTypeFields() {
@@ -184,9 +124,9 @@ function captureGPS() {
       document.getElementById('gps-accuracy').textContent = '±'+Math.round(acc)+'m';
 
       if (btn) {
-        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Captured';
-        btn.className = 'btn btn-success btn-sm';
-        btn.disabled  = false;
+        btn.innerHTML='<i class="fa-solid fa-circle-check"></i> Captured';
+        btn.style.cssText='background:rgba(0,200,100,.15);border-color:var(--accent);color:var(--accent)';
+        btn.disabled=false;
       }
       toast('GPS captured: '+lat.toFixed(5)+', '+lng.toFixed(5));
 
@@ -228,7 +168,7 @@ function handlePhotoFiles(files) {
     if (!file.type.startsWith('image')) return;
     const url = URL.createObjectURL(file);
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;background:var(--bg)';
+    wrap.style.cssText='position:relative;width:90px;height:90px;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;background:var(--surface2)';
     const img = document.createElement('img');
     img.src=url; img.style.cssText='width:100%;height:100%;object-fit:cover;display:block';
     const del = document.createElement('button');
@@ -258,8 +198,6 @@ async function submitCapture() {
   const payload = {
     name, type, geomType, condition: cond,
     coordinates:      [lng, lat],
-    sector:           document.getElementById('cap-sector')?.value || '',
-    assessed:         document.getElementById('cap-assessed')?.value || 'Assessed',
     mda:              document.getElementById('cap-mda')?.value || '',
     material:         document.getElementById('cap-material')?.value || '',
     state:            document.getElementById('cap-state')?.value || '',
@@ -290,6 +228,13 @@ async function submitCapture() {
         try { await apiUploadPhoto(savedId, f); } catch {}
       }
     }
+
+    // Redirect to the new asset's detail page. Only done on a successful
+    // online save — asset-view.html loads strictly via apiGetAsset(id) with
+    // no localStorage fallback, so redirecting there for an offline/local-only
+    // save (the catch branch below) would land on an error page instead.
+    window.location.href = `asset-view.html?id=${encodeURIComponent(savedId)}`;
+    return;
   } catch {
     assetCounter++;
     const a = { id:'AST-'+assetCounter, assetId:'AST-'+assetCounter, name, type, geomType, lat, lng, condition:cond, typeData, ts:Date.now(), ...payload };
@@ -309,25 +254,19 @@ async function submitCapture() {
 const captureAsset = submitCapture;
 
 function clearForm() {
-  ['cap-name','cap-material','cap-state','cap-lga','cap-address','cap-notes',
-   'cap-lat','cap-lng','cap-sector','cap-area','cap-elev'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
+  ['cap-name','cap-material','cap-state','cap-lga','cap-address','cap-notes','cap-lat','cap-lng'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
   });
-  const mdaEl  = document.getElementById('cap-mda');  if (mdaEl)  mdaEl.value  = '';
-  const typeEl = document.getElementById('cap-type'); if (typeEl) typeEl.value = '';
-  const geomEl = document.getElementById('cap-geom'); if (geomEl) geomEl.value = 'Point';
-  const condEl = document.getElementById('cap-cond'); if (condEl) condEl.value = 'Good';
-  // Reset assessment toggle
-  const assEl  = document.getElementById('cap-assessed'); if (assEl) assEl.value = 'Assessed';
-  if (typeof setAssessment === 'function') setAssessment('Assessed');
-  const dispEl = document.getElementById('gps-display');  if (dispEl) dispEl.textContent = 'No coordinates captured';
-  const accEl  = document.getElementById('gps-accuracy'); if (accEl)  accEl.textContent  = '';
-  const idEl   = document.getElementById('cap-id');       if (idEl)   idEl.value         = 'AST-' + (assetCounter + 1);
-  const wrap   = document.getElementById('type-specific-wrap'); if (wrap) wrap.style.display = 'none';
-  const btn    = document.getElementById('gps-btn');
-  if (btn) { btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Capture GPS'; btn.disabled = false; btn.className = 'btn btn-gps btn-sm'; }
-  const preview = document.getElementById('photo-preview'); if (preview) preview.innerHTML = '';
-  const coordLabel = document.getElementById('preview-coords-label'); if (coordLabel) coordLabel.textContent = 'No coordinates captured';
+  const mdaEl=document.getElementById('cap-mda'); if(mdaEl) mdaEl.value='';
+  const typeEl=document.getElementById('cap-type'); if(typeEl) typeEl.value='';
+  const geomEl=document.getElementById('cap-geom'); if(geomEl) geomEl.value='Point';
+  const condEl=document.getElementById('cap-cond'); if(condEl) condEl.value='Good';
+  const dispEl=document.getElementById('gps-display'); if(dispEl) dispEl.textContent='No coordinates captured';
+  const accEl=document.getElementById('gps-accuracy'); if(accEl) accEl.textContent='';
+  const idEl=document.getElementById('cap-id'); if(idEl) idEl.value='AST-'+(assetCounter+1);
+  const wrap=document.getElementById('type-specific-wrap'); if(wrap) wrap.style.display='none';
+  const btn=document.getElementById('gps-btn'); if(btn){btn.innerHTML='<i class="fa-solid fa-location-crosshairs"></i> Capture GPS';btn.disabled=false;btn.style.cssText='';}
+  const preview=document.getElementById('photo-preview'); if(preview) preview.innerHTML='';
   _pendingPhotoFiles = [];
 }
 
