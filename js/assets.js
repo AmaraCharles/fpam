@@ -85,6 +85,16 @@ async function renderAssets() {
     if (geom) filteredAssets = filteredAssets.filter(a => (a.geomType||a.geom) === geom);
     if (mda)  filteredAssets = filteredAssets.filter(a => a.mda === mda);
   }
+
+  // ── PHOTOS FIRST ─────────────────────────────────────────────────────────
+  // Stable sort (guaranteed since ES2019) — moves assets that have photos to
+  // the top without otherwise disturbing relative order, rather than hiding
+  // assets without photos.
+  if (document.getElementById('filter-photos-first')?.checked) {
+    const hasPhotos = a => (a.photos?.length || a.photoCount || 0) > 0;
+    filteredAssets.sort((a, b) => (hasPhotos(b) ? 1 : 0) - (hasPhotos(a) ? 1 : 0));
+  }
+
   renderAssetsTable(filteredAssets);
 }
 
@@ -203,6 +213,8 @@ function clearFilters() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const photosFirst = document.getElementById('filter-photos-first');
+  if (photosFirst) photosFirst.checked = false;
   renderAssets();
 }
 
