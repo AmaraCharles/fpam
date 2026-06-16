@@ -169,6 +169,18 @@
   box-shadow: -4px 0 24px rgba(0,0,0,.08);
 }
 .map-sidebar-panel.open { transform: none; }
+
+/* This page's own floating map controls (search toggle/panel, filter pills,
+   top-right controls) sit at z-index 600, and the asset detail side panel at
+   500 — both above main.css's default mobile nav z-index (200) and its
+   backdrop (39). That let those controls poke through the dimming overlay
+   instead of being covered by it when the nav was open. Raise the nav above
+   everything on this page specifically, without changing the shared default
+   in main.css that every other page relies on. */
+@media (max-width: 900px) {
+  #sidebar-overlay { z-index: 650; }
+  #sidebar { z-index: 700; }
+}
 </style>
 </head>
 <body>
