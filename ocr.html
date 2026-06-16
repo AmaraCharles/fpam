@@ -155,8 +155,7 @@ let _ocrHistory = JSON.parse(localStorage.getItem('ocr_history')||'[]');
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
   initTheme(); renderUserBadge(); checkApiHealth();
-  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
-  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  
 
   const dz = document.getElementById('ocr-drop');
   dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('over'); });

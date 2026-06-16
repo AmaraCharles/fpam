@@ -121,8 +121,7 @@ function doLogout(){ apiLogout().finally(()=>{ localStorage.removeItem('as_token
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('as_token')) { window.location.href='login.html'; return; }
   initTheme(); renderUserBadge(); checkApiHealth();
-  document.getElementById('menu-toggle')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.toggle('open'); document.getElementById('sidebar-overlay')?.classList.toggle('open'); });
-  document.getElementById('sidebar-overlay')?.addEventListener('click',()=>{ document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-overlay')?.classList.remove('open'); });
+  
   loadAnalytics();
 });
 function reloadCharts() { loadAnalytics(); }
